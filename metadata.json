@@ -1,0 +1,6 @@
+{
+  "name": "Groundwork",
+  "description": "Truth-grounded AI resume builder and analyzer featuring real-time metric validation, voice dictation, and ATS parseability proofs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

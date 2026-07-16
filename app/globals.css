@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@import "../lib/design-tokens.css";
+
+/* Apply font mappings and default base styles using Groundwork's spec */
+body {
+  font-family: var(--font-body), sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace;
+}

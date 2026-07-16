@@ -1,0 +1,49 @@
+:root {
+  /* Color tokens - Groundwork Spec */
+  --color-ink: #16211C;        /* Primary text, headlines (deep blue-black-green) */
+  --color-paper: #F4F5F7;      /* App background (cool light grey) */
+  --color-surface: #FFFFFF;    /* Cards, panels, input fields */
+  --color-evidence: #C98A2E;   /* Signature color - AI-grounded / verified */
+  --color-signal: #2B4C6F;     /* Primary actions, links, active states (deep slate blue) */
+  --color-caution: #B0492A;    /* Findings/gaps flagged, score-fail states (muted brick-red) */
+  --color-line: #D8DBD3;       /* Hairlines, dividers, disabled states */
+
+  /* Type scale & spacing tokens - Groundwork Spec */
+  --text-display-lg-size: 56px;
+  --text-display-lg-line-height: 1.05;
+  --text-display-lg-weight: 480;
+
+  --text-display-sm-size: 34px;
+  --text-display-sm-line-height: 1.15;
+  --text-display-sm-weight: 480;
+
+  --text-heading-size: 22px;
+  --text-heading-line-height: 1.3;
+  --text-heading-weight: 600;
+
+  --text-body-size: 16px;
+  --text-body-line-height: 1.55;
+  --text-body-weight: 400;
+
+  --text-small-size: 13px;
+  --text-small-line-height: 1.4;
+  --text-small-weight: 400;
+
+  --text-mono-size: 14px;
+  --text-mono-line-height: 1.4;
+  --text-mono-weight: 500;
+
+  /* Spacing Scale - Groundwork Spec */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Border radius - ledger-like, no fully rounded pill buttons */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+}
