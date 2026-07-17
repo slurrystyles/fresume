@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Server-side check of export limits for non-premium (Free) tier
+    // Server-side check of active one-time access subscription
     if (supabase && resumeId && userId) {
       const { data: subscription } = await supabase
         .from('subscriptions')
@@ -25,39 +25,17 @@ export async function POST(request: Request) {
         .eq('user_id', userId)
         .maybeSingle();
 
-      const isPro = subscription?.tier === "pro" && subscription?.status === "active" && (
-        !subscription.ends_at || new Date(subscription.ends_at) > new Date()
-      );
+      const isPro = subscription?.tier === "pro" && subscription?.status === "active";
 
       if (!isPro) {
-        // Find user's resumes
-        const { data: userResumes } = await supabase
-          .from('resumes')
-          .select('id')
-          .eq('user_id', userId);
-
-        const resumeIds = userResumes?.map((r: any) => r.id) || [resumeId];
-
-        // Count downloads for this month (Free limit: 3)
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-
-        const { count } = await supabase
-          .from('exports')
-          .select('*', { count: 'exact', head: true })
-          .in('resume_id', resumeIds)
-          .gte('created_at', startOfMonth);
-
-        if (count !== null && count >= 3) {
-          return NextResponse.json(
-            { 
-              success: false, 
-              error: "Monthly free export limit exceeded (3 / month). Please upgrade to the Pro Ledger Plan for unlimited exports.",
-              limitExceeded: true
-            },
-            { status: 403 }
-          );
-        }
+        return NextResponse.json(
+          { 
+            success: false, 
+            error: "Payment required: You need to pay ₹20 for one-time access to export this resume.",
+            limitExceeded: true
+          },
+          { status: 403 }
+        );
       }
     }
 
@@ -84,6 +62,11 @@ export async function POST(request: Request) {
         });
       });
     };
+
+    // Auto-expire subscription on successful generation
+    if (supabase && userId) {
+      await supabase.from("subscriptions").update({ status: "expired" }).eq("user_id", userId);
+    }
 
     try {
       const pdfBuffer = await generatePdfBuffer();

@@ -4,14 +4,14 @@
   --font-body: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
-  /* Color tokens - Groundwork Spec */
-  --color-ink: #16211C;        /* Primary text, headlines (deep blue-black-green) */
-  --color-paper: #F4F5F7;      /* App background (cool light grey) */
-  --color-surface: #FFFFFF;    /* Cards, panels, input fields */
-  --color-evidence: #C98A2E;   /* Signature color - AI-grounded / verified */
-  --color-signal: #2B4C6F;     /* Primary actions, links, active states (deep slate blue) */
-  --color-caution: #B0492A;    /* Findings/gaps flagged, score-fail states (muted brick-red) */
-  --color-line: #D8DBD3;       /* Hairlines, dividers, disabled states */
+  /* Color tokens - Fresume Glassmorphism Dark Spec */
+  --color-ink: #F8FAFC;        /* Slate-50: Primary text, headlines */
+  --color-paper: #090D16;      /* Deep Slate-Black: App background */
+  --color-surface: rgba(15, 23, 42, 0.65); /* Slate-900 Translucent: Cards, panels, fields */
+  --color-evidence: #F59E0B;   /* Amber-500: AI-grounded / verified achievements */
+  --color-signal: #3B82F6;     /* Blue-500: Primary actions, links, active states */
+  --color-caution: #EF4444;    /* Red-500: Findings, gaps, score-fail warnings */
+  --color-line: #1E293B;       /* Slate-800: Borders, hair-lines, dividers */
 
   /* Type scale & spacing tokens - Groundwork Spec */
   --text-display-lg-size: 56px;

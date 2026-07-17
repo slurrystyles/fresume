@@ -63,15 +63,13 @@ export async function POST(request: Request) {
       const userId = notes.userId;
 
       if (userId && supabase) {
-        const endsAt = new Date();
-        
         if (event === "order.paid" || event === "payment.captured" || event === "subscription.charged") {
-          endsAt.setMonth(endsAt.getMonth() + 12); // Grant 1 year access
+          // Grant one-time session access (pro, active)
           await supabase.from("subscriptions").upsert({
             user_id: userId,
             tier: "pro",
             status: "active",
-            ends_at: endsAt.toISOString(),
+            ends_at: null,
           }, { onConflict: "user_id" });
         } else if (event === "subscription.cancelled" || event === "subscription.halted" || event === "subscription.expired") {
           // Downgrade to free on subscription cancellation
@@ -96,7 +94,7 @@ export async function POST(request: Request) {
     }
 
     if (action === "create_order") {
-      const orderAmount = amount || 149900; // in paisa (₹1,499.00 INR)
+      const orderAmount = amount || 2000; // in paise (₹20.00 INR)
       
       if (client) {
         // Real Razorpay order creation
@@ -176,16 +174,13 @@ export async function POST(request: Request) {
       if (isVerified) {
         // Upgrade user premium subscription in database
         if (supabase) {
-          const endsAt = new Date();
-          endsAt.setMonth(endsAt.getMonth() + 12); // 1-year access
-
           const { error: subError } = await supabase
             .from("subscriptions")
             .upsert({
               user_id: userId,
               tier: "pro",
               status: "active",
-              ends_at: endsAt.toISOString(),
+              ends_at: null,
             }, { onConflict: "user_id" });
 
           if (subError) {
@@ -195,7 +190,7 @@ export async function POST(request: Request) {
               user_id: userId,
               tier: "pro",
               status: "active",
-              ends_at: endsAt.toISOString(),
+              ends_at: null,
             });
           }
         }

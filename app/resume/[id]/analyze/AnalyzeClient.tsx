@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { Database } from "../../../../lib/supabase";
+import { Database, supabase } from "../../../../lib/supabase";
 import { Resume, ScoreSnapshot, JDRecord } from "../../../../lib/schema";
 import { 
   ArrowLeft, ArrowRight, RefreshCw, AlertTriangle, CheckCircle2, 
@@ -31,6 +31,28 @@ export default function AnalyzePage({ params }: PageProps) {
   const [savingJd, setSavingJd] = useState(false);
 
   useEffect(() => {
+    // 1. Verify active single-session pass
+    if (supabase) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) {
+          window.location.href = "/";
+          return;
+        }
+        supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle().then(({ data: subData }) => {
+          const isPro = subData?.tier === "pro" && subData?.status === "active";
+          if (!isPro) {
+            window.location.href = "/?paywall=true";
+          }
+        });
+      }).catch(() => {
+        window.location.href = "/";
+      });
+    } else {
+      window.location.href = "/";
+      return;
+    }
+
+    // 2. Fetch resume details
     Database.getResumeById(id).then(data => {
       if (data) {
         setResume(data);

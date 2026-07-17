@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import React, { useState, useEffect } from "react";
-import { Database } from "../../../../lib/supabase";
+import { Database, supabase } from "../../../../lib/supabase";
 import { Resume, Bullet, Education, Experience, Project, Certification, ExportRecord } from "../../../../lib/schema";
 import { auditChainOfCustody, AuditResult } from "../../../../lib/audit";
 import { 
@@ -43,6 +43,28 @@ export default function GeneratePage({ params }: PageProps) {
   };
 
   useEffect(() => {
+    // 1. Verify active single-session pass
+    if (supabase) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (!user) {
+          window.location.href = "/";
+          return;
+        }
+        supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle().then(({ data: subData }) => {
+          const isPro = subData?.tier === "pro" && subData?.status === "active";
+          if (!isPro) {
+            window.location.href = "/?paywall=true";
+          }
+        });
+      }).catch(() => {
+        window.location.href = "/";
+      });
+    } else {
+      window.location.href = "/";
+      return;
+    }
+
+    // 2. Fetch resume details
     Database.getResumeById(id).then(data => {
       if (data) {
         setResume(data);
@@ -73,6 +95,19 @@ export default function GeneratePage({ params }: PageProps) {
         file_url: `/exports/${resume?.id}_${format}_${Date.now()}`
       });
       loadExportsHistory();
+
+      // Auto-expire subscription on download client-side
+      if (supabase && resume?.user_id) {
+        await supabase
+          .from("subscriptions")
+          .update({ status: "expired" })
+          .eq("user_id", resume.user_id);
+      }
+
+      // Redirect after short delay to allow file stream to load
+      setTimeout(() => {
+        window.location.href = "/?session_completed=true";
+      }, 1500);
     } catch (err) {
       console.error("Failed to save export log:", err);
     }
@@ -146,7 +181,7 @@ export default function GeneratePage({ params }: PageProps) {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         if (response.status === 403 || errorData.limitExceeded) {
-          alert(errorData.error || "Monthly free export limit exceeded (3 / month). Please upgrade to the Pro Ledger Plan for unlimited exports.");
+          alert(errorData.error || "Payment required: You need to pay ₹20 for one-time access to export this resume.");
         } else {
           alert(errorData.error || "Failed to download plaintext resume.");
         }
@@ -234,13 +269,13 @@ export default function GeneratePage({ params }: PageProps) {
         const a = document.createElement("a");
         a.href = url;
         const name = resume.resume_data.contact.name || "Resume";
-        a.download = `${name.replace(/\s+/g, "_")}_Groundwork_Export.doc`;
+        a.download = `${name.replace(/\s+/g, "_")}_Fresume_Export.doc`;
         a.click();
         logExport("docx");
       } else {
         const errorData = await response.json().catch(() => ({}));
         if (response.status === 403 || errorData.limitExceeded) {
-          alert(errorData.error || "Monthly free export limit exceeded (3 / month). Please upgrade to the Pro Ledger Plan for unlimited exports.");
+          alert(errorData.error || "Payment required: You need to pay ₹20 for one-time access to export this resume.");
         } else {
           alert(errorData.error || "Failed to compile Word document.");
         }
