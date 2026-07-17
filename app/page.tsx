@@ -1,9 +1,12 @@
-import Link from "next/link";
-import { Sparkles, FileText, CheckCircle2, ShieldCheck, ArrowRight, Layers, LayoutGrid, Clock, Printer } from "lucide-react";
+"use client";
 
-export const dynamic = "force-dynamic";
+import React, { useState } from "react";
+import Link from "next/link";
+import { Sparkles, FileText, CheckCircle2, ShieldCheck, ArrowRight, Layers, LayoutGrid, Clock, Printer, X } from "lucide-react";
 
 export default function MarketingPage() {
+  const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+
   const templates = [
     { id: "classic", label: "Classic Professional", sub: "Standard, corporate roles (Finance, Sales, Ops)" },
     { id: "grotesk", label: "Modern Grotesk", sub: "Tech, software engineering, and creative startups" },
@@ -14,6 +17,190 @@ export default function MarketingPage() {
     { id: "minimal", label: "Structured Minimal", sub: "Clean design-adjacent with fine accent highlights" },
     { id: "fresher-psu", label: "Formal/PSU (IN)", sub: "Government jobs requiring passport size photo layouts" },
   ];
+
+  const mockData = {
+    name: "Aman Sharma",
+    title: "Senior Full Stack Engineer",
+    email: "aman.sharma@example.com",
+    phone: "+91 98765 43210",
+    location: "Delhi, India",
+    linkedin: "linkedin.com/in/amansharma",
+    github: "github.com/amansharma",
+    summary: "Results-driven Software Engineer with 4+ years of experience designing and optimizing distributed web applications. Expert in React, Node.js, and cloud systems, focusing on data auditability and performance benchmarks.",
+    experience: [
+      {
+        title: "Senior Software Engineer",
+        company: "DataLedger Technologies",
+        location: "Bengaluru, India",
+        date: "2023 - Present",
+        bullets: [
+          "Architected a real-time ledger auditing engine that processed 5M+ database changes with zero discrepancies.",
+          "Refactored backend microservices using Node.js, reducing query latency by 35% across critical endpoints.",
+          "Led a team of 4 engineers to build the responsive client dashboard using React and Tailwind CSS."
+        ]
+      },
+      {
+        title: "Software Engineer",
+        company: "WebCraft Solutions",
+        location: "New Delhi, India",
+        date: "2021 - 2023",
+        bullets: [
+          "Developed and maintained responsive e-commerce web portals, improving checkout conversions by 15%.",
+          "Optimized client-side bundles, resulting in a 1.2s improvement in First Contentful Paint (FCP) metrics."
+        ]
+      }
+    ],
+    projects: [
+      {
+        title: "AuditTrace Engine",
+        role: "Lead Creator",
+        tech: "TypeScript, PostgreSQL, Docker",
+        bullets: [
+          "Created an open-source data versioning utility with secure SHA-256 integrity checks."
+        ]
+      }
+    ],
+    skills: {
+      languages: ["TypeScript", "JavaScript", "Go", "SQL"],
+      tools: ["React", "Node.js", "Next.js", "Docker", "AWS", "PostgreSQL"],
+      soft: ["Technical Leadership", "Agile Operations", "Communication"]
+    },
+    education: [
+      {
+        degree: "B.Tech in Computer Science & Engineering",
+        institution: "Delhi Technological University (DTU)",
+        date: "2017 - 2021",
+        grade: "8.9 CGPA",
+        boards: "XII: 95.2% | X: 10.0 CGPA"
+      }
+    ]
+  };
+
+  const renderTemplatePreview = (tmplId: string) => {
+    const isGrotesk = tmplId === "grotesk";
+    const isCampus = tmplId === "campus";
+    const isCompact = tmplId === "compact";
+    const isAcademic = tmplId === "academic";
+    const isMinimal = tmplId === "minimal";
+    const isPSU = tmplId === "fresher-psu";
+    const isInternship = tmplId === "internship";
+
+    const fontStyle = isAcademic ? "font-serif text-[10px]" : isGrotesk ? "font-sans text-[10px]" : "font-sans text-[10px]";
+
+    return (
+      <div className={`w-full bg-white text-slate-800 p-6 rounded-lg shadow-inner ${fontStyle} leading-normal text-left max-h-[60vh] overflow-y-auto`}>
+        {/* Header Section */}
+        {isPSU ? (
+          <div className="border border-slate-300 p-4 mb-4 flex justify-between items-start">
+            <div className="space-y-1">
+              <h1 className="text-base font-bold text-slate-900 font-serif uppercase tracking-wide">{mockData.name}</h1>
+              <p className="text-[9px] font-mono text-slate-600">{mockData.email} | {mockData.phone}</p>
+              <p className="text-[9px] font-mono text-slate-600">Location: {mockData.location} | DOB: 12-10-1999</p>
+            </div>
+            <div className="w-16 h-20 border border-dashed border-slate-400 bg-slate-100 flex items-center justify-center text-[7px] text-slate-400 text-center font-mono">
+              Passport Photo
+            </div>
+          </div>
+        ) : (
+          <div className={`pb-4 border-b border-slate-200 mb-4 text-center ${isGrotesk ? 'text-left' : ''} ${isMinimal ? 'border-l-4 border-l-slate-800 pl-3 border-b-0 pb-0' : ''}`}>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">{mockData.name}</h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{mockData.title}</p>
+            <div className="flex flex-wrap justify-center gap-x-3 text-[9px] text-slate-400 mt-1 font-mono">
+              <span>{mockData.location}</span>
+              <span>•</span>
+              <span>{mockData.phone}</span>
+              <span>•</span>
+              <span>{mockData.email}</span>
+            </div>
+            <div className="flex justify-center gap-x-3 text-[9px] text-slate-400 mt-0.5 font-mono">
+              <span>{mockData.linkedin}</span>
+              <span>•</span>
+              <span>{mockData.github}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Summary */}
+        {!isCompact && !isPSU && (
+          <div className="mb-4 space-y-1">
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Professional Summary</h2>
+            <p className="text-[10px] text-slate-600 leading-relaxed">{mockData.summary}</p>
+          </div>
+        )}
+
+        {/* Experience Section */}
+        <div className="mb-4 space-y-2">
+          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Experience</h2>
+          {mockData.experience.map((exp, index) => (
+            <div key={index} className="space-y-1">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="font-bold text-slate-900">{exp.title}</span>
+                  <span className="text-slate-500"> — {exp.company}</span>
+                </div>
+                <span className="text-[9px] text-slate-400 font-mono">{exp.date}</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-600 leading-relaxed">
+                {exp.bullets.map((bullet, idx) => (
+                  <li key={idx}>{bullet}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Projects Section */}
+        <div className="mb-4 space-y-2">
+          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Projects</h2>
+          {mockData.projects.map((proj, index) => (
+            <div key={index} className="space-y-1">
+              <div className="flex justify-between items-start">
+                <span className="font-bold text-slate-900">{proj.title} | <span className="font-normal text-slate-500">{proj.role}</span></span>
+                <span className="text-[9px] text-slate-400 font-mono">Tech: {proj.tech}</span>
+              </div>
+              <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-600 leading-relaxed">
+                {proj.bullets.map((bullet, idx) => (
+                  <li key={idx}>{bullet}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Skills Section */}
+        <div className="mb-4 space-y-1">
+          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Skills</h2>
+          <div className="grid grid-cols-1 gap-1 text-[9px] text-slate-600">
+            <div><strong className="text-slate-900">Languages:</strong> {mockData.skills.languages.join(", ")}</div>
+            <div><strong className="text-slate-900">Tools & Platforms:</strong> {mockData.skills.tools.join(", ")}</div>
+            {!isCompact && <div><strong className="text-slate-900">Soft Skills:</strong> {mockData.skills.soft.join(", ")}</div>}
+          </div>
+        </div>
+
+        {/* Education Section */}
+        <div className="space-y-2">
+          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Education</h2>
+          {mockData.education.map((edu, index) => (
+            <div key={index} className="space-y-0.5">
+              <div className="flex justify-between">
+                <span className="font-bold text-slate-900">{edu.degree}</span>
+                <span className="text-[9px] text-slate-400 font-mono">{edu.date}</span>
+              </div>
+              <div className="text-slate-600 flex justify-between text-[9px]">
+                <span>{edu.institution}</span>
+                <span className="font-semibold text-slate-700">Grade: {edu.grade}</span>
+              </div>
+              {(isCampus || isPSU) && (
+                <div className="text-[8px] font-mono text-slate-500 bg-slate-50 border border-slate-150 p-1.5 rounded mt-0.5">
+                  {edu.boards}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-hidden relative">
@@ -144,7 +331,7 @@ export default function MarketingPage() {
               <div className="p-4 bg-slate-950 border border-slate-850 rounded-xl space-y-1">
                 <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">GROUNDED COMPLIANCE</span>
                 <p className="text-xs text-slate-300 font-mono mt-1">"Refactored backend pipeline code, introducing [ADD LATENCY METRIC] to optimize data throughput."</p>
-                <p className="text-[10px] text-slate-500 font-mono mt-1">* Reason: Prompt user placeholder added safely. Facts validated.</p>
+                <p className="text-[10px] text-slate-500 font-mono mt-1">* Reason: Facts validated. Placeholders added safely.</p>
               </div>
             </div>
           </div>
@@ -156,24 +343,28 @@ export default function MarketingPage() {
         <div className="text-center space-y-3 mb-16">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white">8 ATS-Guaranteed Templates</h2>
           <p className="text-sm text-slate-400 max-w-lg mx-auto font-mono">
-            Designed for specific regions and career segments.
+            Designed for specific regions and career segments. Click a card to preview.
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {templates.map((tmpl) => (
-            <div key={tmpl.id} className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-5 rounded-xl space-y-3 hover:border-slate-700 transition-all flex flex-col justify-between">
+            <div 
+              key={tmpl.id} 
+              onClick={() => setPreviewTemplate(tmpl.id)}
+              className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-5 rounded-xl space-y-3 hover:border-slate-700 transition-all flex flex-col justify-between cursor-pointer group"
+            >
               <div className="space-y-2">
-                <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:border-blue-500/40 transition-all">
                   Template
                 </span>
-                <h3 className="text-sm font-bold text-white font-body">{tmpl.label}</h3>
+                <h3 className="text-sm font-bold text-white font-body group-hover:text-blue-400 transition-all">{tmpl.label}</h3>
                 <p className="text-[11px] text-slate-400 leading-relaxed font-sans">{tmpl.sub}</p>
               </div>
-              <Link href="/app" className="text-[11px] font-mono text-blue-400 hover:text-blue-300 flex items-center gap-1.5 pt-2">
-                <span>View Style</span>
+              <span className="text-[11px] font-mono text-blue-400 group-hover:text-blue-300 flex items-center gap-1.5 pt-2">
+                <span>View Style Preview</span>
                 <ArrowRight size={10} />
-              </Link>
+              </span>
             </div>
           ))}
         </div>
@@ -235,6 +426,52 @@ export default function MarketingPage() {
           </Link>
         </div>
       </section>
+
+      {/* TEMPLATE PREVIEW MODAL */}
+      {previewTemplate && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col space-y-4 relative">
+            <button 
+              onClick={() => setPreviewTemplate(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-all"
+            >
+              <X size={20} />
+            </button>
+            <div className="space-y-1">
+              <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">
+                Live Design Showcase
+              </span>
+              <h3 className="font-display text-xl font-bold text-white">
+                {templates.find(t => t.id === previewTemplate)?.label} Layout Preview
+              </h3>
+            </div>
+            
+            {/* Render selected stylesheet miniature resume inside the modal */}
+            {renderTemplatePreview(previewTemplate)}
+
+            <div className="flex justify-between items-center pt-2">
+              <p className="text-[10px] text-slate-500 font-mono">
+                * Note: Displays clean ATS-optimized rendering with no watermark tags.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPreviewTemplate(null)}
+                  className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200 font-mono transition-all"
+                >
+                  Close
+                </button>
+                <Link
+                  href="/app"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-xs font-bold shadow-lg shadow-blue-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Use this Template</span>
+                  <ArrowRight size={12} />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-900 py-8 text-center text-xs text-slate-600 font-mono relative z-10">
