@@ -111,7 +111,7 @@ export default function Dashboard() {
           action: "create_order",
           userId: user.id,
           email: user.email,
-          amount: 149900 // ₹1499.00 INR
+          amount: 2000 // ₹20.00 INR (2000 paise)
         })
       });
 
@@ -125,7 +125,7 @@ export default function Dashboard() {
         // High-fidelity payment sandbox simulation
         const confirmSim = confirm(
           "🇮🇳 [SANDBOX MODE] Initiating India-First Razorpay Checkout Simulation.\n\n" +
-          "Amount: ₹1,499.00 INR (Pro Ledger Plan)\n" +
+          "Amount: ₹20.00 INR (Fresume Single Session Pass)\n" +
           "Receipt ID: " + orderData.orderId + "\n\n" +
           "Click OK to simulate successful Razorpay webhook settlement & signature verification."
         );
@@ -141,8 +141,9 @@ export default function Dashboard() {
           });
           const verifyData = await verifyResponse.json();
           if (verifyData.success) {
-            alert("Payment successfully processed! You now have a Pro Truth-Grounded Ledger Plan.");
+            alert("Payment successfully processed! You now have an active Fresume Session.");
             loadData();
+            setShowPaywallModal(false);
           } else {
             alert("Verification failed: " + verifyData.error);
           }
@@ -173,8 +174,8 @@ export default function Dashboard() {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: "Groundwork Pro",
-        description: "Truth-Grounded AI Resume Ledger - Premium Upgrade",
+        name: "Fresume Pro Access",
+        description: "Fresume — Single-Session Resume access token",
         order_id: orderData.orderId,
         handler: async function (response: any) {
           const verifyResponse = await fetch("/api/billing/razorpay", {
@@ -190,8 +191,9 @@ export default function Dashboard() {
           });
           const verifyData = await verifyResponse.json();
           if (verifyData.success) {
-            alert("Payment successfully verified! Your ledger account is upgraded to Pro.");
+            alert("Payment successfully verified! Your Fresume session is active.");
             loadData();
+            setShowPaywallModal(false);
           } else {
             alert("Signature validation failed: " + verifyData.error);
           }
@@ -200,7 +202,7 @@ export default function Dashboard() {
           email: user.email,
         },
         theme: {
-          color: "#0F172A",
+          color: "#2563EB",
         },
       };
 
@@ -296,7 +298,7 @@ export default function Dashboard() {
       setResumes(list);
       setShowCreateModal(false);
       setNewTitle("");
-      window.location.href = `/resume/${created.id}/fix`;
+      window.location.href = `/resume/${created.id}/analyze`;
     } catch (err: any) {
       alert("Error building resume: " + err.message);
     }
@@ -335,7 +337,7 @@ export default function Dashboard() {
         setResumes(list);
         setShowImportModal(false);
         setImportText("");
-        window.location.href = `/resume/${data.resume.id}/fix`;
+        window.location.href = `/resume/${data.resume.id}/analyze`;
       } else {
         alert("Extraction failed: " + (data.error || "Unknown error"));
       }

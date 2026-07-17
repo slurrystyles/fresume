@@ -64,20 +64,20 @@ export default function FixPage({ params }: PageProps) {
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (!user) {
-          window.location.href = "/";
+          window.location.href = "/app";
           return;
         }
         supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle().then(({ data: subData }) => {
           const isPro = subData?.tier === "pro" && subData?.status === "active";
           if (!isPro) {
-            window.location.href = "/?paywall=true";
+            window.location.href = "/app?paywall=true";
           }
         });
       }).catch(() => {
-        window.location.href = "/";
+        window.location.href = "/app";
       });
     } else {
-      window.location.href = "/";
+      window.location.href = "/app";
       return;
     }
 

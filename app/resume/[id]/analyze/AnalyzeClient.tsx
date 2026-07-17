@@ -31,24 +31,18 @@ export default function AnalyzePage({ params }: PageProps) {
   const [savingJd, setSavingJd] = useState(false);
 
   useEffect(() => {
-    // 1. Verify active single-session pass
+    // 1. Verify user session is authenticated (free page)
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (!user) {
-          window.location.href = "/";
+          window.location.href = "/app";
           return;
         }
-        supabase.from("subscriptions").select("*").eq("user_id", user.id).maybeSingle().then(({ data: subData }) => {
-          const isPro = subData?.tier === "pro" && subData?.status === "active";
-          if (!isPro) {
-            window.location.href = "/?paywall=true";
-          }
-        });
       }).catch(() => {
-        window.location.href = "/";
+        window.location.href = "/app";
       });
     } else {
-      window.location.href = "/";
+      window.location.href = "/app";
       return;
     }
 
