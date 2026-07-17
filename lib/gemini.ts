@@ -47,53 +47,8 @@ export function validateGroundedNumbers(originalText: string, rewrittenText: str
  * Walks every bullet's source_note chain back to human origins (e.g., "user-provided", "voice-transcript", "user-edited-manual").
  * Flags any bullet where the chain is purely AI-sourced or missing proper lineage.
  */
-export interface AuditResult {
-  passed: boolean;
-  auditedBullets: {
-    bulletId: string;
-    text: string;
-    chain: string[];
-    isGrounded: boolean;
-  }[];
-}
-
-export function auditChainOfCustody(resumeData: ResumeData): AuditResult {
-  const auditedBullets: AuditResult["auditedBullets"] = [];
-  let passed = true;
-
-  const checkBullet = (b: Bullet) => {
-    const chain: string[] = [];
-    let currentNote = b.source_note || "unknown";
-    chain.push(currentNote);
-
-    // Human-derived markers
-    const isHumanRoot = 
-      currentNote.includes("user-provided") || 
-      currentNote.includes("voice-transcript") || 
-      currentNote.includes("user-edited-manual") ||
-      currentNote.includes("guided-wizard");
-
-    if (!isHumanRoot && currentNote.startsWith("ai-rewrite-of")) {
-      // Trace the parent
-      chain.push("parent-grounded");
-    }
-
-    const isGrounded = isHumanRoot || chain.includes("parent-grounded");
-    if (!isGrounded) passed = false;
-
-    auditedBullets.push({
-      bulletId: b.id,
-      text: b.text,
-      chain,
-      isGrounded
-    });
-  };
-
-  resumeData.experience.forEach(exp => exp.bullets.forEach(checkBullet));
-  resumeData.projects.forEach(proj => proj.bullets.forEach(checkBullet));
-
-  return { passed, auditedBullets };
-}
+export { auditChainOfCustody } from "./audit";
+export type { AuditResult } from "./audit";
 
 /**
  * 1. EXTRACTION ENGINE: Extract unstructured text into the canonical ResumeData structure

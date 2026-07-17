@@ -1,4 +1,9 @@
 :root {
+  /* Font Family tokens - Groundwork Spec */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
   /* Color tokens - Groundwork Spec */
   --color-ink: #16211C;        /* Primary text, headlines (deep blue-black-green) */
   --color-paper: #F4F5F7;      /* App background (cool light grey) */
