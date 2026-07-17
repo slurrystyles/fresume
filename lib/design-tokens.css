@@ -1,8 +1,8 @@
 :root {
   /* Font Family tokens - Groundwork Spec */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-body: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), ui-monospace, monospace;
 
   /* Color tokens - Groundwork Spec */
   --color-ink: #16211C;        /* Primary text, headlines (deep blue-black-green) */
