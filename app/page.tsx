@@ -339,12 +339,12 @@ export default function MarketingPage() {
         </div>
       </section>
 
-      {/* Template Showcase - Interactive layout swap on hover */}
+      {/* Template Showcase - Interactive layout modal on click */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full">
         <div className="text-center space-y-3 mb-16">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white">8 ATS-Guaranteed Layouts</h2>
           <p className="text-xs text-slate-400 max-w-lg mx-auto font-mono">
-            Hover over a card to preview how your bullet renders in that template&apos;s actual typography.
+            Click a template card below to open its design preview showing a complete mock resume layout.
           </p>
         </div>
 
@@ -352,40 +352,26 @@ export default function MarketingPage() {
           {templates.map((tmpl) => (
             <div
               key={tmpl.id}
-              onMouseEnter={() => setHoveredTemplate(tmpl.id)}
-              onMouseLeave={() => setHoveredTemplate(null)}
+              onClick={() => setPreviewTemplate(tmpl.id)}
               className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-5 rounded-xl transition-all hover:border-slate-700 min-h-48 flex flex-col justify-between group cursor-pointer"
             >
-              {hoveredTemplate === tmpl.id ? (
-                /* LIVE TYPE PREVIEW IN MODAL STYLE */
-                <div className="flex-1 flex flex-col justify-center py-2 animate-fadeIn">
-                  <div className={tmpl.style}>
-                    &ldquo;{result ? result.rewritten : bulletText}&rdquo;
-                  </div>
-                  <p className="text-[8px] font-mono text-slate-500 text-center mt-3 tracking-wider uppercase">
-                    {tmpl.label} Rendering
+              <div className="flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <span className="text-[8px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
+                    {tmpl.target}
+                  </span>
+                  <h3 className="text-sm font-bold text-white font-body group-hover:text-blue-400 transition-all">
+                    {tmpl.label}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                    {tmpl.sub}
                   </p>
                 </div>
-              ) : (
-                /* STATIC PREVIEW LAYOUT */
-                <div className="flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
-                    <span className="text-[8px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
-                      {tmpl.target}
-                    </span>
-                    <h3 className="text-sm font-bold text-white font-body group-hover:text-blue-400 transition-all">
-                      {tmpl.label}
-                    </h3>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                      {tmpl.sub}
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-mono text-blue-400 flex items-center gap-1">
-                    <span>Hover to preview type</span>
-                    <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
-                  </span>
-                </div>
-              )}
+                <span className="text-[10px] font-mono text-blue-400 flex items-center gap-1">
+                  <span>Click to preview layout</span>
+                  <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                </span>
+              </div>
             </div>
           ))}
         </div>
