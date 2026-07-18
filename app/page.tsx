@@ -128,195 +128,696 @@ export default function MarketingPage() {
     switch (tmplId) {
       case "classic":
         return (
-          <div style={{ fontFamily: "Georgia, serif", color: "#1e293b" }} className="bg-white border border-slate-200 rounded p-6 text-[9px] leading-normal text-left max-h-96 overflow-y-auto space-y-3 shadow-inner">
-            <div className="text-center border-b border-slate-200 pb-2">
-              <h4 className="text-sm font-bold text-slate-900">{data.contact.name}</h4>
-              <div className="flex justify-center gap-1.5 text-[7.5px] text-slate-400 mt-0.5">
-                <span>{data.contact.location}</span>|<span>{data.contact.email}</span>|<span>{data.contact.phone}</span>
+          <div style={{ fontFamily: "Georgia, serif", color: "#1e293b" }} className="space-y-5 text-xs leading-normal w-full">
+            {/* Header */}
+            <div className="text-center border-b border-slate-200 pb-3">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{data.contact.name}</h1>
+              <div className="flex justify-center gap-x-2.5 text-[9px] text-slate-400 mt-1 font-mono">
+                <span>{data.contact.location}</span><span>|</span>
+                <span>{data.contact.phone}</span><span>|</span>
+                <span>{data.contact.email}</span>
               </div>
+              {(data.contact.linkedin_url || data.contact.github_url) && (
+                <div className="flex justify-center gap-x-3 text-[9px] text-slate-400 mt-0.5 font-mono">
+                  {data.contact.linkedin_url && <span>LinkedIn: {data.contact.linkedin_url}</span>}
+                  {data.contact.github_url && <span>GitHub: {data.contact.github_url}</span>}
+                </div>
+              )}
             </div>
+
+            {/* Summary */}
             {data.summary && (
-              <div>
-                <h5 className="text-[9px] font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5 mb-1">Professional Summary</h5>
-                <p className="text-slate-650">{data.summary}</p>
+              <div className="space-y-1">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Professional Summary</h2>
+                <p className="text-slate-650 leading-relaxed">{data.summary}</p>
               </div>
             )}
-            <div>
-              <h5 className="text-[9px] font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5 mb-1">Professional Experience</h5>
-              {data.experience.map((exp, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex justify-between font-semibold text-slate-900">
-                    <span>{exp.title} — {exp.org}</span>
-                    <span className="font-normal text-slate-400">{exp.start_date} - {exp.end_date}</span>
+
+            {/* Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-2.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Professional Experience</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{exp.title} at {exp.org}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-400 italic">{exp.location}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
                   </div>
-                  <ul className="list-disc pl-3 text-slate-700 space-y-0.5">
-                    {exp.bullets.map((b, bIdx) => <li key={bIdx}>{b.text}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case "grotesk":
-        return (
-          <div style={{ fontFamily: "system-ui, sans-serif", color: "#0f172a" }} className="bg-white border border-slate-200 rounded p-6 text-[9.5px] leading-relaxed text-left max-h-96 overflow-y-auto space-y-3 shadow-inner">
-            <div className="border-b border-slate-950 pb-2">
-              <h4 className="text-sm font-bold text-slate-900">{data.contact.name}</h4>
-              <div className="flex gap-2 text-[8px] text-slate-500 mt-1 font-mono">
-                <span>{data.contact.email}</span><span>|</span><span>{data.contact.phone}</span>
+                ))}
+              </div>
+            )}
+
+            {/* Projects */}
+            {data.projects.length > 0 && (
+              <div className="space-y-2.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Projects</h2>
+                {data.projects.map((proj, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{proj.title} — {proj.role}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{proj.start_date} - {proj.end_date}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-mono">Technologies: {proj.tech_stack.join(", ")}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {proj.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Skills */}
+            <div className="space-y-1.5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Technical Skills</h2>
+              <div className="grid grid-cols-1 gap-1 text-slate-700">
+                <div><span className="font-semibold text-slate-900">Core Languages & Tech:</span> {data.skills.technical.join(", ")}</div>
+                <div><span className="font-semibold text-slate-900">Tools & Platforms:</span> {data.skills.tools.join(", ")}</div>
+                <div><span className="font-semibold text-slate-900">Soft Skills:</span> {data.skills.soft.join(", ")}</div>
               </div>
             </div>
-            <div>
-              <h5 className="text-[9px] font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-1.5 mb-1">Technical Skills</h5>
-              <div className="text-slate-700"><strong>Tech:</strong> {data.skills.technical.join(", ")} | <strong>Infrastructure:</strong> {data.skills.tools.join(", ")}</div>
-            </div>
-            <div>
-              <h5 className="text-[9px] font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-1.5 mb-1">Experience</h5>
-              {data.experience.map((exp, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex justify-between font-bold text-slate-900">
-                    <span>{exp.title} at {exp.org}</span>
-                    <span className="font-normal text-slate-400">{exp.start_date} - {exp.end_date}</span>
+
+            {/* Education */}
+            {data.education.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500 text-[10px]">
+                      <span>Location: {edu.location}</span>
+                      <span>CGPA/Grade: {edu.cgpa_or_percentage}</span>
+                    </div>
                   </div>
-                  <ul className="list-disc pl-3 text-slate-700 space-y-0.5">
-                    {exp.bullets.map((b, bIdx) => <li key={bIdx}>{b.text}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case "campus":
-        return (
-          <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b" }} className="bg-white border border-slate-200 rounded p-6 text-[9.5px] leading-normal text-left max-h-96 overflow-y-auto space-y-3 shadow-inner">
-            <div className="text-center border-b-2 border-[#1E3A8A] pb-2">
-              <h4 className="text-sm font-bold text-[#1E3A8A] uppercase">{data.contact.name}</h4>
-              <div className="flex justify-center gap-2 text-[8px] text-blue-800 font-mono mt-1">
-                <span>{data.contact.email}</span>|<span>{data.contact.phone}</span>
+                ))}
               </div>
-            </div>
-            <div>
-              <h5 className="text-[9px] font-bold uppercase text-[#1E3A8A] border-b border-blue-100 pb-0.5 mb-1">Education</h5>
-              {data.education.map((edu, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex justify-between font-bold text-slate-900">
-                    <span>{edu.degree} — {edu.institution}</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 mt-1 p-1 bg-blue-50/50 border border-blue-100 rounded text-[8px]">
-                    <div><strong>Class X Board:</strong> {edu.board_x}</div>
-                    <div><strong>Class XII Board:</strong> {edu.board_xii}</div>
-                  </div>
+            )}
+
+            {/* Certifications */}
+            {data.certifications.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Certifications</h2>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  {data.certifications.map((cert, idx) => (
+                    <div key={idx} className="flex justify-between text-[10px]">
+                      <span>{cert.name} ({cert.issuer})</span>
+                      <span className="text-slate-400 font-mono text-[9px]">{cert.date}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="p-2 bg-slate-50 border border-slate-200 rounded text-[8.5px] text-slate-500 font-mono">
-              <strong>Mandatory Declarations:</strong> Campus Recruit Candidate | Trace Verified
-            </div>
-          </div>
-        );
-      case "internship":
-        return (
-          <div style={{ fontFamily: "Helvetica, sans-serif", color: "#1f2937" }} className="bg-white border border-slate-200 rounded p-6 text-[9.5px] leading-normal text-left max-h-96 overflow-y-auto space-y-3 shadow-inner">
-            <div className="border-b border-[#3730A3] pb-2">
-              <h4 className="text-sm font-bold text-slate-950">{data.contact.name}</h4>
-              <p className="text-[8px] text-slate-500 font-mono mt-1">{data.contact.email} | {data.contact.phone}</p>
-            </div>
-            <div>
-              <h5 className="text-[9px] font-bold uppercase text-[#3730A3] border-b border-indigo-100 pb-0.5 mb-1">Education</h5>
-              {data.education.map((edu, idx) => (
-                <div key={idx} className="flex justify-between font-bold text-slate-900">
-                  <span>{edu.degree} ({edu.cgpa_or_percentage})</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case "compact":
-        return (
-          <div style={{ fontFamily: "Arial, sans-serif", color: "#334155" }} className="bg-white border border-slate-200 rounded p-6 text-[8.5px] leading-tight text-left max-h-96 overflow-y-auto space-y-2.5 shadow-inner">
-            <div className="flex justify-between items-start border-b border-slate-900 pb-1.5">
-              <h4 className="text-xs font-bold text-slate-900">{data.contact.name}</h4>
-            </div>
-            {data.summary && <p className="text-slate-600 font-sans leading-snug">{data.summary}</p>}
-            <div>
-              <h5 className="text-[8.5px] font-bold uppercase bg-slate-100 px-1 py-0.5 mb-1 text-slate-900">Experience</h5>
-              {data.experience.map((exp, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex justify-between font-bold text-slate-900">
-                    <span>{exp.title} — {exp.org}</span>
-                  </div>
-                  <ul className="list-disc pl-3 text-slate-600 space-y-0.5">
-                    {exp.bullets.map((b, bIdx) => <li key={bIdx}>{b.text}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      case "academic":
-        return (
-          <div style={{ fontFamily: "'Times New Roman', Times, serif", color: "#111827" }} className="bg-white border border-slate-200 rounded p-6 text-[10px] leading-relaxed text-left max-h-96 overflow-y-auto space-y-4 shadow-inner">
-            <div className="text-center border-b-2 border-gray-950 pb-2">
-              <h4 className="text-sm font-bold text-black uppercase">{data.contact.name}</h4>
-            </div>
-            <div>
-              <h5 className="text-[9.5px] font-bold italic text-black border-b border-gray-900 pb-0.5 mb-1">Education</h5>
-              {data.education.map((edu, idx) => (
-                <div key={idx} className="flex justify-between font-bold text-black">
-                  <span>{edu.degree} — {edu.institution}</span>
-                </div>
-              ))}
-            </div>
-            {publications.length > 0 && (
-              <div>
-                <h5 className="text-[9.5px] font-bold italic text-black border-b border-gray-900 pb-0.5 mb-1">Publications</h5>
-                <ul className="list-disc pl-3 text-gray-800 space-y-0.5">
-                  {publications.map((pub, idx) => <li key={idx}>{pub.text}</li>)}
+              </div>
+            )}
+
+            {/* Achievements */}
+            {otherAchievements.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 border-b border-slate-200 pb-0.5">Achievements</h2>
+                <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                  {otherAchievements.map((ach, idx) => (
+                    <li key={idx} className="leading-relaxed">{ach.text}</li>
+                  ))}
                 </ul>
               </div>
             )}
           </div>
         );
+
+      case "grotesk":
+        return (
+          <div style={{ fontFamily: "system-ui, -apple-system, sans-serif", color: "#0f172a" }} className="space-y-5 text-[11px] leading-relaxed w-full">
+            {/* Header */}
+            <div className="border-b border-slate-950 pb-3">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{data.contact.name}</h1>
+              <div className="flex flex-wrap gap-x-4 text-[9px] text-slate-500 mt-2 font-mono">
+                <span>{data.contact.location}</span>
+                <span>{data.contact.phone}</span>
+                <span>{data.contact.email}</span>
+                {data.contact.linkedin_url && <span>LinkedIn: {data.contact.linkedin_url}</span>}
+                {data.contact.github_url && <span>GitHub: {data.contact.github_url}</span>}
+              </div>
+            </div>
+
+            {/* 1. Technical Skills */}
+            <div className="space-y-1.5">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-2">Technical Skills</h2>
+              <div className="space-y-1 text-slate-700">
+                <div><strong>Languages & Tech:</strong> {data.skills.technical.join(", ")}</div>
+                <div><strong>Tools & Platforms:</strong> {data.skills.tools.join(", ")}</div>
+                <div><strong>Soft Skills:</strong> {data.skills.soft.join(", ")}</div>
+              </div>
+            </div>
+
+            {/* 2. Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-2">Professional Experience</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{exp.title} | {exp.org}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <p className="text-[9px] text-slate-400">{exp.location}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 3. Projects */}
+            {data.projects.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-2">Projects</h2>
+                {data.projects.map((proj, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{proj.title} — {proj.role}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{proj.start_date} - {proj.end_date}</span>
+                    </div>
+                    <p className="text-[9px] text-slate-400">Stack: {proj.tech_stack.join(", ")}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {proj.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 4. Education */}
+            {data.education.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-2">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500 text-[10px]">
+                      <span>{edu.location}</span>
+                      <span>CGPA: {edu.cgpa_or_percentage}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 5. Certifications */}
+            {data.certifications.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-wide text-slate-900 border-l-2 border-slate-900 pl-2">Certifications</h2>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  {data.certifications.map((cert, idx) => (
+                    <div key={idx} className="flex justify-between text-[10px]">
+                      <span>{cert.name} ({cert.issuer})</span>
+                      <span className="text-slate-400 font-mono text-[9px]">{cert.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case "campus":
+        return (
+          <div style={{ fontFamily: "Arial, sans-serif", color: "#1e293b" }} className="space-y-5 text-xs leading-normal w-full">
+            {/* Header */}
+            <div className="text-center border-b-2 border-[#1E3A8A] pb-3">
+              <h1 className="text-2xl font-bold text-[#1E3A8A] uppercase tracking-wide">{data.contact.name}</h1>
+              <p className="text-[9px] font-mono text-blue-800 tracking-wider mt-0.5 font-semibold">Campus Placement Portfolio</p>
+              <div className="flex justify-center gap-x-3 text-[10px] text-blue-800 mt-2 font-mono">
+                <span>{data.contact.location}</span>
+                <span>{data.contact.phone}</span>
+                <span>{data.contact.email}</span>
+              </div>
+              {(data.contact.linkedin_url || data.contact.github_url) && (
+                <div className="flex justify-center gap-x-3 text-[10px] text-blue-800 mt-0.5 font-mono">
+                  {data.contact.linkedin_url && <span>LinkedIn: {data.contact.linkedin_url}</span>}
+                  {data.contact.github_url && <span>GitHub: {data.contact.github_url}</span>}
+                </div>
+              )}
+            </div>
+
+            {/* 1. Education (First) */}
+            {data.education.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-slate-500 font-mono text-[10px]">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    
+                    {/* CGPA / X / XII board marks grid layout */}
+                    <div className="grid grid-cols-3 gap-3 mt-1.5 p-2 bg-blue-50/50 border border-blue-100 rounded text-[9.5px]">
+                      <div>
+                        <span className="block text-slate-500 uppercase text-[8px] font-mono">Degree CGPA</span>
+                        <span className="font-bold text-slate-900">{edu.cgpa_or_percentage}</span>
+                      </div>
+                      <div>
+                        <span className="block text-slate-500 uppercase text-[8px] font-mono">Class X Board</span>
+                        <span className="font-bold text-slate-900">{edu.board_x}</span>
+                      </div>
+                      <div>
+                        <span className="block text-slate-500 uppercase text-[8px] font-mono">Class XII Board</span>
+                        <span className="font-bold text-slate-900">{edu.board_xii}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 2. Campus declarations */}
+            <div className="space-y-1 bg-slate-50 p-3 border border-slate-200 rounded font-mono text-[9px] text-slate-650">
+              <span className="font-bold uppercase text-[8px] text-slate-500 block mb-1">Mandatory Placement Declarations (India)</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div>Candidate Stream Status: <span className="font-bold text-slate-900">Campus Placement Recruit</span></div>
+                <div>Ledger Audit Verification: <span className="font-bold text-slate-900">Trace Verified on Groundwork Ledger</span></div>
+              </div>
+            </div>
+
+            {/* 3. Projects */}
+            {data.projects.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5">Projects</h2>
+                {data.projects.map((proj, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{proj.title} ({proj.role})</span>
+                      <span className="font-normal text-slate-500 font-mono text-[10px]">{proj.start_date} - {proj.end_date}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-mono">Technologies: {proj.tech_stack.join(", ")}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {proj.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 4. Skills */}
+            <div className="space-y-1.5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5">Technical Stack</h2>
+              <div className="space-y-1 text-slate-700">
+                <div><strong>Languages:</strong> {data.skills.technical.join(", ")}</div>
+                <div><strong>Platforms:</strong> {data.skills.tools.join(", ")}</div>
+              </div>
+            </div>
+
+            {/* 5. Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5">Experience</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{exp.title} at {exp.org}</span>
+                      <span className="font-normal text-slate-500 font-mono text-[10px]">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 6. Certifications */}
+            {data.certifications.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5">Certifications</h2>
+                <div className="grid grid-cols-2 gap-2 text-slate-700">
+                  {data.certifications.map((cert, idx) => (
+                    <div key={idx} className="flex justify-between text-[10px]">
+                      <span>{cert.name}</span>
+                      <span className="text-slate-400 font-mono text-[9px]">{cert.date}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
+      case "internship":
+        return (
+          <div style={{ fontFamily: "Helvetica, Arial, sans-serif", color: "#1f2937" }} className="space-y-5 text-xs leading-normal w-full">
+            {/* Header */}
+            <div className="border-b border-indigo-200 pb-3 flex flex-col text-left space-y-1">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">{data.contact.name}</h1>
+              <div className="flex flex-wrap gap-2 text-[9px] text-slate-500 font-mono">
+                <span>{data.contact.email}</span><span>|</span>
+                <span>{data.contact.phone}</span><span>|</span>
+                <span>{data.contact.location}</span>
+              </div>
+            </div>
+
+            {/* 1. Education */}
+            {data.education.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-900 border-b border-indigo-200 pb-0.5">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500 text-[10px]">
+                      <span>Location: {edu.location}</span>
+                      <span>Grade: {edu.cgpa_or_percentage}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 2. Projects */}
+            {data.projects.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-900 border-b border-indigo-200 pb-0.5">Projects</h2>
+                {data.projects.map((proj, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{proj.title} ({proj.role})</span>
+                      <span className="font-normal text-slate-500 font-mono text-[10px]">{proj.start_date} - {proj.end_date}</span>
+                    </div>
+                    <p className="text-[10px] text-indigo-700 font-mono">Stack: {proj.tech_stack.join(", ")}</p>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {proj.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 3. Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-2.5">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-900 border-b border-indigo-200 pb-0.5">Experience</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-semibold text-slate-900">
+                      <span>{exp.title} at {exp.org}</span>
+                      <span className="font-normal text-slate-500 text-[10px] font-mono">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 4. Skills */}
+            <div className="space-y-1.5">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-900 border-b border-indigo-200 pb-0.5">Technical Stack</h2>
+              <div className="space-y-1 text-slate-700">
+                <div><strong>Programming:</strong> {data.skills.technical.join(", ")}</div>
+                <div><strong>Infrastructure:</strong> {data.skills.tools.join(", ")}</div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "compact":
+        return (
+          <div style={{ fontFamily: "Arial, sans-serif", color: "#334155" }} className="space-y-3.5 text-[10px] leading-tight w-full">
+            {/* Header */}
+            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-2">
+              <div>
+                <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">{data.contact.name}</h1>
+                <p className="text-[9px] text-slate-500 italic mt-0.5">{data.contact.location}</p>
+              </div>
+              <div className="text-right font-mono text-[9px] text-slate-500 space-y-0.5">
+                <div>{data.contact.email}</div>
+                <div>{data.contact.phone}</div>
+              </div>
+            </div>
+
+            {/* Summary */}
+            {data.summary && (
+              <div className="space-y-0.5">
+                <h2 className="text-[10px] font-sans font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 text-slate-900">Summary</h2>
+                <p className="text-slate-650 leading-relaxed">{data.summary}</p>
+              </div>
+            )}
+
+            {/* Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-[10px] font-sans font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 text-slate-900">Experience</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{exp.title} — {exp.org}</span>
+                      <span className="font-normal text-slate-500 font-mono text-[8.5px]">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-600">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-snug">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Skills */}
+            <div className="space-y-1">
+              <h2 className="text-[10px] font-sans font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 text-slate-900">Skills</h2>
+              <div className="space-y-0.5 text-slate-605 pl-1">
+                <div><strong>Tech:</strong> {data.skills.technical.join(", ")}</div>
+                <div><strong>Tools:</strong> {data.skills.tools.join(", ")}</div>
+              </div>
+            </div>
+
+            {/* Projects */}
+            {data.projects.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-[10px] font-sans font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 text-slate-900">Projects</h2>
+                {data.projects.map((proj, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{proj.title}</span>
+                      <span className="font-normal text-slate-500 font-mono text-[8.5px]">{proj.start_date} - {proj.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-600">
+                      {proj.bullets.map((b, bIdx) => <li key={bIdx} className="leading-snug">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Education */}
+            {data.education.length > 0 && (
+              <div className="space-y-1.5">
+                <h2 className="text-[10px] font-sans font-extrabold uppercase bg-slate-100 px-1.5 py-0.5 text-slate-900">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-0.5">
+                    <div className="flex justify-between font-bold text-slate-900">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-slate-500 font-mono text-[8.5px]">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    <div className="flex justify-between text-slate-500 text-[8.5px]">
+                      <span>{edu.location}</span>
+                      <span>CGPA: {edu.cgpa_or_percentage}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case "academic":
+        return (
+          <div style={{ fontFamily: "'Times New Roman', Times, serif", color: "#111827" }} className="space-y-5 text-[11.5px] leading-relaxed w-full">
+            {/* Header */}
+            <div className="text-center border-b-2 border-gray-950 pb-3 flex flex-col items-center space-y-1">
+              <h1 className="text-3xl text-black font-semibold font-serif uppercase tracking-wider">{data.contact.name}</h1>
+              <div className="text-xs text-gray-500 flex gap-3 font-mono flex-wrap justify-center">
+                <span>{data.contact.location}</span><span>|</span>
+                <span>{data.contact.phone}</span><span>|</span>
+                <span>{data.contact.email}</span>
+              </div>
+            </div>
+
+            {/* Summary */}
+            {data.summary && (
+              <div className="space-y-1.5">
+                <h2 className="font-serif text-sm font-bold italic border-b border-gray-950 pb-0.5">Research Profile</h2>
+                <p className="text-gray-700 leading-relaxed font-serif">{data.summary}</p>
+              </div>
+            )}
+
+            {/* 1. Education */}
+            {data.education.length > 0 && (
+              <div className="space-y-2.5">
+                <h2 className="font-serif text-sm font-bold italic border-b border-gray-950 pb-0.5">Education</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-black">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-gray-500 text-[10.5px] font-mono">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* 2. Publications */}
+            {publications.length > 0 && (
+              <div className="space-y-2">
+                <h2 className="font-serif text-sm font-bold italic border-b border-gray-950 pb-0.5">Publications & Papers</h2>
+                <ul className="list-disc pl-4 space-y-1 text-gray-800">
+                  {publications.map((pub, idx) => (
+                    <li key={idx} className="leading-relaxed font-serif">{pub.text}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* 3. ResearchAppointments */}
+            {data.experience.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="font-serif text-sm font-bold italic border-b border-gray-950 pb-0.5">Appointments</h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between font-bold text-black">
+                      <span>{exp.title} — {exp.org}</span>
+                      <span className="font-normal text-gray-500 text-[10.5px] font-mono">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-gray-800">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed font-serif">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
       case "minimal":
         return (
-          <div style={{ fontFamily: "Georgia, serif", color: "#334155" }} className="bg-white border border-slate-200 rounded p-6 text-[9.5px] leading-relaxed text-left max-h-96 overflow-y-auto space-y-3.5 shadow-inner">
-            <div className="border-l-2 border-[#8A5A34] pl-2.5 py-0.5">
-              <h4 className="text-sm font-light uppercase tracking-widest text-[#8A5A34]">{data.contact.name}</h4>
+          <div style={{ fontFamily: "Georgia, serif", color: "#334155" }} className="space-y-5 text-xs leading-relaxed w-full">
+            {/* Header */}
+            <div className="border-l-4 border-[#8A5A34] pl-4 py-1.5 flex flex-col text-left space-y-0.5">
+              <h1 className="text-2xl font-light tracking-widest text-[#8A5A34] uppercase">{data.contact.name}</h1>
+              <div className="flex flex-wrap gap-x-3 text-[10px] text-slate-400 font-mono mt-1">
+                <span>{data.contact.email}</span><span>|</span>
+                <span>{data.contact.phone}</span><span>|</span>
+                <span>{data.contact.location}</span>
+              </div>
             </div>
-            <div>
-              <h5 className="text-[9px] font-semibold uppercase tracking-widest text-[#8A5A34] flex items-center gap-1.5 mb-1">
-                <span className="w-1 h-1 bg-[#8A5A34] rounded-full"></span>Technical Stack
-              </h5>
-              <p className="text-slate-600 pl-2"><strong>Core:</strong> {data.skills.technical.join(", ")}</p>
+
+            {/* Skills */}
+            <div className="space-y-1.5">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-[#8A5A34] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-[#8A5A34] rounded-full"></span>Technical Stack
+              </h2>
+              <div className="pl-3 space-y-1 text-slate-700">
+                <div><strong>Languages:</strong> {data.skills.technical.join(", ")}</div>
+                <div><strong>Tools:</strong> {data.skills.tools.join(", ")}</div>
+              </div>
             </div>
+
+            {/* Experience */}
+            {data.experience.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-[#8A5A34] flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-[#8A5A34] rounded-full"></span>Experience
+                </h2>
+                {data.experience.map((exp, idx) => (
+                  <div key={idx} className="pl-3 border-l border-slate-100 space-y-1">
+                    <div className="flex justify-between font-bold text-slate-800">
+                      <span>{exp.title} — {exp.org}</span>
+                      <span className="font-normal text-slate-400 font-mono text-[9.5px]">{exp.start_date} - {exp.end_date}</span>
+                    </div>
+                    <ul className="list-disc pl-4 space-y-0.5 text-slate-600">
+                      {exp.bullets.map((b, bIdx) => <li key={bIdx} className="leading-relaxed">{b.text}</li>)}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
+
       case "fresher-psu":
         return (
-          <div style={{ fontFamily: "Arial, sans-serif", color: "#000" }} className="bg-white border border-slate-200 rounded p-6 text-[9.5px] leading-normal text-left max-h-96 overflow-y-auto space-y-3 shadow-inner">
-            <div className="border border-black p-2.5 flex justify-between items-start">
+          <div style={{ fontFamily: "Arial, sans-serif", color: "#000" }} className="space-y-4 text-xs leading-normal w-full">
+            {/* Boxed PSU Header */}
+            <div className="border border-black p-3.5 flex justify-between items-start">
               <div>
-                <h4 className="text-sm font-bold uppercase text-black">{data.contact.name}</h4>
-              </div>
-              <div className="w-14 h-16 border border-black bg-gray-150 flex flex-col items-center justify-center p-1 text-center text-[5px] font-mono text-gray-500 uppercase tracking-tighter shrink-0 ml-2 font-bold">
-                <span>PHOTO</span>
-              </div>
-            </div>
-            <div className="border border-black p-2 bg-gray-50 text-[8.5px]">
-              <strong>Declarations:</strong> DOB: {data.segment_fields?.dob} | Category: {data.segment_fields?.category}
-            </div>
-            <div>
-              <h5 className="text-[9px] font-bold uppercase tracking-wide bg-gray-200 border-b border-black py-0.5 px-1.5 text-center mb-1">Academic Records</h5>
-              {data.education.map((edu, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="flex justify-between font-bold">
-                    <span>{edu.degree} — {edu.institution}</span>
-                  </div>
+                <h1 className="text-2xl font-bold uppercase tracking-wide text-black">{data.contact.name}</h1>
+                <p className="text-[9px] font-mono text-gray-750 uppercase tracking-widest mt-1">Application Layout: Government & PSU Format</p>
+                <div className="text-[10px] text-gray-800 font-mono mt-3 space-y-0.5">
+                  <div>Email: {data.contact.email}</div>
+                  <div>Mobile: {data.contact.phone}</div>
                 </div>
-              ))}
+              </div>
+              
+              {/* Photo Box */}
+              <div className="w-20 h-24 border border-black bg-gray-100 flex flex-col items-center justify-center p-2 text-center text-[7px] font-mono text-gray-650 uppercase tracking-tighter shrink-0 ml-4 font-bold">
+                <span>Affix</span>
+                <span>Passport</span>
+                <span>Photo</span>
+                <span>Here</span>
+              </div>
             </div>
+
+            {/* Personal Declarations */}
+            <div className="border border-black p-3 bg-gray-50 font-mono text-[9.5px]">
+              <span className="font-bold uppercase text-[9px] block mb-1">Government Mandated Declarations:</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div>Date of Birth: <span className="font-bold">{data.segment_fields?.dob}</span></div>
+                <div>Category: <span className="font-bold">{data.segment_fields?.category}</span></div>
+              </div>
+            </div>
+
+            {/* Education */}
+            {data.education.length > 0 && (
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-wide bg-gray-200 border border-black py-1 px-2.5 text-center mb-2">Education Records</h2>
+                {data.education.map((edu, idx) => (
+                  <div key={idx} className="space-y-1.5">
+                    <div className="flex justify-between font-bold">
+                      <span>{edu.degree} — {edu.institution}</span>
+                      <span className="font-normal text-gray-700 font-mono text-[10px]">{edu.start_date} - {edu.end_date}</span>
+                    </div>
+                    {/* India Class X / XII boards table-like format using grids */}
+                    <div className="grid grid-cols-3 gap-2 border border-black p-2 text-[9.5px]">
+                      <div>
+                        <span className="block text-gray-500 uppercase text-[8px] font-mono">B.Tech CGPA</span>
+                        <span className="font-bold">{edu.cgpa_or_percentage}</span>
+                      </div>
+                      <div>
+                        <span className="block text-gray-500 uppercase text-[8px] font-mono">Class X Board</span>
+                        <span className="font-bold">{edu.board_x}</span>
+                      </div>
+                      <div>
+                        <span className="block text-gray-500 uppercase text-[8px] font-mono">Class XII Board</span>
+                        <span className="font-bold">{edu.board_xii}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
+
       default:
         return null;
     }
@@ -770,52 +1271,95 @@ export default function MarketingPage() {
           </Link>
         </div>
       </section>
-
       {/* TEMPLATE PREVIEW MODAL */}
-      {previewTemplate && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col space-y-4 relative">
-            <button 
-              onClick={() => setPreviewTemplate(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-all cursor-pointer"
-            >
-              <X size={20} />
-            </button>
-            <div className="space-y-1 text-left">
-              <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">
-                Live Design Showcase
-              </span>
-              <h3 className="font-display text-xl font-bold text-white">
-                {templates.find(t => t.id === previewTemplate)?.label} Layout Preview
-              </h3>
-            </div>
-            
-            {/* Render selected stylesheet miniature resume inside the modal */}
-            {renderTemplatePreview(previewTemplate)}
+      {previewTemplate && (() => {
+        const activeTmpl = templates.find(t => t.id === previewTemplate);
+        if (!activeTmpl) return null;
 
-            <div className="flex justify-between items-center pt-2">
-              <p className="text-[10px] text-slate-500 font-mono text-left">
-                * Note: Displays clean ATS-optimized rendering with no watermark tags.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPreviewTemplate(null)}
-                  className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200 font-mono transition-all cursor-pointer"
-                >
-                  Close
-                </button>
-                <Link
-                  href="/app"
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-xs font-bold shadow-lg shadow-blue-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Use this Template</span>
-                  <ArrowRight size={12} />
-                </Link>
+        // Custom template highlights to list in details pane
+        const highlights: Record<string, string[]> = {
+          classic: ["Georgia Serif Typography", "Standard Centered Header", "Experience-First Hierarchy", "CGPA/GPA Display (No Board Marks)"],
+          grotesk: ["Source Sans 3 Typography", "Skills Section at the Very Top", "Strictly ATS-Safe (No Monospace headers)", "Minimal Modern Spacing"],
+          campus: ["Arial Sans-Serif", "Education Placed at the Top", "India Placement Board Marks Grids (X/XII)", "Mandatory Placement Declarations Box"],
+          internship: ["Helvetica Sans-Serif", "Indigo Styling Accents", "Education & Projects Focused Hierarchy", "GPA Only (No X/XII board marks)"],
+          compact: ["Condensed Arial Layout", "High-Density Compact Spacing", "Summary & Experience Focused", "Optimized for Senior Applicants"],
+          academic: ["Times New Roman Serif", "Expanded CV Hierarchy", "Dedicated Publications Section", "Loose Academic Leading"],
+          minimal: ["Georgia Serif Typography", "Rust Accent (#8A5A34) Highlights", "Clean Left-Accented Structure", "Skills & Tech-Forward Hierarchy"],
+          "fresher-psu": ["Arial Boxed Formal Layout", "Government PSU Alignment", "Boxed Passport Photo Slot", "Declarations Block (DOB & Category)", "X/XII Board Marks Grids"]
+        };
+
+        return (
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8 z-50 animate-fadeIn">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-5xl w-full h-[90vh] md:h-[85vh] shadow-2xl flex flex-col md:flex-row overflow-hidden relative">
+              
+              {/* Close Button (Mobile & Desktop corner close) */}
+              <button 
+                onClick={() => setPreviewTemplate(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-all cursor-pointer z-50 w-8 h-8 rounded-full bg-slate-950/40 border border-slate-800 flex items-center justify-center"
+              >
+                <X size={16} />
+              </button>
+
+              {/* LEFT COLUMN: Control Details Pane (width: ~30%) */}
+              <div className="bg-slate-950/50 p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800 shrink-0 md:w-80 overflow-y-auto">
+                <div className="space-y-6 text-left">
+                  <div className="space-y-2">
+                    <span className="text-[9px] font-mono text-blue-400 uppercase tracking-widest font-semibold bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full inline-block">
+                      {activeTmpl.target}
+                    </span>
+                    <h3 className="font-display text-xl font-bold text-white leading-tight">
+                      {activeTmpl.label}
+                    </h3>
+                    <p className="text-[11px] text-slate-400 font-sans leading-relaxed">
+                      {activeTmpl.sub}
+                    </p>
+                  </div>
+
+                  <div className="space-y-3 border-t border-slate-800/80 pt-4">
+                    <h4 className="text-[10px] font-mono uppercase text-slate-500 tracking-wider">Design Attributes</h4>
+                    <ul className="space-y-2">
+                      {(highlights[previewTemplate] || []).map((highlight, idx) => (
+                        <li key={idx} className="flex items-center gap-2 text-xs text-slate-300">
+                          <CheckCircle2 size={12} className="text-emerald-500 shrink-0" />
+                          <span>{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="border-t border-slate-800/80 pt-4 text-[10px] font-mono text-slate-500 leading-relaxed">
+                    * Displays clean ATS-optimized rendering with no watermark tags.
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-6 border-t border-slate-800/80 md:border-t-0">
+                  <Link
+                    href="/app"
+                    className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-xs font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Use this Template</span>
+                    <ArrowRight size={12} />
+                  </Link>
+                  <button
+                    onClick={() => setPreviewTemplate(null)}
+                    className="w-full py-2 text-xs text-slate-450 hover:text-slate-200 hover:bg-slate-850/50 border border-slate-800 font-mono rounded-lg transition-all cursor-pointer"
+                  >
+                    Close Preview
+                  </button>
+                </div>
               </div>
+
+              {/* RIGHT COLUMN: Large Canvas A4 Page Sheet Pane (~70%) */}
+              <div className="flex-1 bg-slate-950/20 p-4 md:p-8 overflow-y-auto flex justify-center items-start">
+                <div className="bg-white text-slate-800 shadow-2xl p-8 md:p-12 w-full max-w-[210mm] min-h-[297mm] rounded-md border border-slate-200 text-left font-sans text-xs flex flex-col justify-start">
+                  {renderTemplatePreview(previewTemplate)}
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Footer */}
       <footer className="border-t border-slate-900 py-8 text-center text-xs text-slate-600 font-mono relative z-10">
