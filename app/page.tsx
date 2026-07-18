@@ -106,20 +106,6 @@ export default function MarketingPage() {
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-      {/* Navbar header */}
-      <header className="max-w-6xl mx-auto w-full px-6 py-6 flex justify-between items-center relative z-20 border-b border-slate-900">
-        <div className="flex items-center gap-2">
-          <span className="font-display text-2xl font-bold tracking-tight text-white bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Fresume</span>
-          <span className="text-[9px] font-mono uppercase bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-semibold tracking-wider">India-First</span>
-        </div>
-        <Link 
-          href="/app" 
-          className="px-4 py-2 border border-slate-800 hover:bg-slate-900 text-slate-200 rounded-lg font-mono text-xs transition-all flex items-center gap-1.5"
-        >
-          <span>Go to App</span>
-          <ArrowRight size={12} />
-        </Link>
-      </header>
 
       {/* Hero Section */}
       <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center space-y-8 relative z-10">
