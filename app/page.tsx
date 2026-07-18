@@ -1,372 +1,469 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Sparkles, FileText, CheckCircle2, ShieldCheck, ArrowRight, Layers, LayoutGrid, Clock, Printer, X } from "lucide-react";
+import { Sparkles, FileText, CheckCircle2, ShieldCheck, ArrowRight, Layers, LayoutGrid, Clock, Printer, X, RefreshCw } from "lucide-react";
+
+// Score Counter component for animating stats in pipeline strip
+function ScoreCounter({ target, active }: { target: number; active: boolean }) {
+  const [score, setScore] = useState(0);
+
+  useEffect(() => {
+    if (!active) {
+      setScore(0);
+      return;
+    }
+    let current = 0;
+    const increment = Math.max(1, Math.ceil(target / 15));
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setScore(target);
+        clearInterval(timer);
+      } else {
+        setScore(current);
+      }
+    }, 40);
+    return () => clearInterval(timer);
+  }, [target, active]);
+
+  return <span className="font-mono text-4xl md:text-5xl font-bold tracking-tight">{score}</span>;
+}
 
 export default function MarketingPage() {
-  const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  const [segment, setSegment] = useState<"student" | "professional">("professional");
+  const [bulletText, setBulletText] = useState("Helped improve backend performance for the team.");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{
+    rewritten: string;
+    grounded: boolean;
+    note?: string;
+  } | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const templates = [
-    { id: "classic", label: "Classic Professional", sub: "Standard, corporate roles (Finance, Sales, Ops)" },
-    { id: "grotesk", label: "Modern Grotesk", sub: "Tech, software engineering, and creative startups" },
-    { id: "campus", label: "Campus Fresher (IN)", sub: "Indian student CGPA, course work & XII/X board logs" },
-    { id: "internship", label: "Internship/Fresher Intl.", sub: "Student roles, project-centric layout with no boards" },
-    { id: "compact", label: "Executive Compact", sub: "Dense layout optimized for 5+ years of experience" },
-    { id: "academic", label: "Academic/Research", sub: "Expanded CV style for publications, research, & teaching" },
-    { id: "minimal", label: "Structured Minimal", sub: "Clean design-adjacent with fine accent highlights" },
-    { id: "fresher-psu", label: "Formal/PSU (IN)", sub: "Government jobs requiring passport size photo layouts" },
-  ];
+  // Track hovered state for pipeline strip to trigger score animations
+  const [activePipelineStage, setActivePipelineStage] = useState<number | null>(null);
+  
+  // Track hovered template for showcase swap
+  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
 
-  const mockData = {
-    name: "Aman Sharma",
-    title: "Senior Full Stack Engineer",
-    email: "aman.sharma@example.com",
-    phone: "+91 98765 43210",
-    location: "Delhi, India",
-    linkedin: "linkedin.com/in/amansharma",
-    github: "github.com/amansharma",
-    summary: "Results-driven Software Engineer with 4+ years of experience designing and optimizing distributed web applications. Expert in React, Node.js, and cloud systems, focusing on data auditability and performance benchmarks.",
-    experience: [
-      {
-        title: "Senior Software Engineer",
-        company: "DataLedger Technologies",
-        location: "Bengaluru, India",
-        date: "2023 - Present",
-        bullets: [
-          "Architected a real-time ledger auditing engine that processed 5M+ database changes with zero discrepancies.",
-          "Refactored backend microservices using Node.js, reducing query latency by 35% across critical endpoints.",
-          "Led a team of 4 engineers to build the responsive client dashboard using React and Tailwind CSS."
-        ]
-      },
-      {
-        title: "Software Engineer",
-        company: "WebCraft Solutions",
-        location: "New Delhi, India",
-        date: "2021 - 2023",
-        bullets: [
-          "Developed and maintained responsive e-commerce web portals, improving checkout conversions by 15%.",
-          "Optimized client-side bundles, resulting in a 1.2s improvement in First Contentful Paint (FCP) metrics."
-        ]
+  // Default bullets for segment changes
+  useEffect(() => {
+    if (segment === "student") {
+      setBulletText("Worked on a project for my final year submission.");
+    } else {
+      setBulletText("Helped improve backend performance for the team.");
+    }
+    setResult(null);
+    setErrorMsg(null);
+  }, [segment]);
+
+  const handleRewrite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulletText.trim()) return;
+    setLoading(true);
+    setErrorMsg(null);
+    setResult(null);
+
+    try {
+      const response = await fetch("/api/demo-rewrite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bulletText })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMsg(data.error || "Failed to process rewrite.");
+      } else {
+        setResult({
+          rewritten: data.rewritten,
+          grounded: data.grounded,
+          note: data.note
+        });
       }
-    ],
-    projects: [
-      {
-        title: "AuditTrace Engine",
-        role: "Lead Creator",
-        tech: "TypeScript, PostgreSQL, Docker",
-        bullets: [
-          "Created an open-source data versioning utility with secure SHA-256 integrity checks."
-        ]
-      }
-    ],
-    skills: {
-      languages: ["TypeScript", "JavaScript", "Go", "SQL"],
-      tools: ["React", "Node.js", "Next.js", "Docker", "AWS", "PostgreSQL"],
-      soft: ["Technical Leadership", "Agile Operations", "Communication"]
-    },
-    education: [
-      {
-        degree: "B.Tech in Computer Science & Engineering",
-        institution: "Delhi Technological University (DTU)",
-        date: "2017 - 2021",
-        grade: "8.9 CGPA",
-        boards: "XII: 95.2% | X: 10.0 CGPA"
-      }
-    ]
+    } catch (err: any) {
+      setErrorMsg("Connection issue. Please verify your internet connection.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const renderTemplatePreview = (tmplId: string) => {
-    const isGrotesk = tmplId === "grotesk";
-    const isCampus = tmplId === "campus";
-    const isCompact = tmplId === "compact";
-    const isAcademic = tmplId === "academic";
-    const isMinimal = tmplId === "minimal";
-    const isPSU = tmplId === "fresher-psu";
-    const isInternship = tmplId === "internship";
+  const templates = [
+    { id: "classic", label: "Classic Professional", sub: "Standard, corporate roles (Finance, Sales, Ops)", target: "Corporate Professionals", style: "font-serif text-slate-800 text-[10px] text-center border-t border-slate-300 pt-3" },
+    { id: "grotesk", label: "Modern Grotesk", sub: "Tech, software engineering, and creative startups", target: "Tech & Creatives", style: "font-mono text-slate-900 text-[9px] uppercase border-l-2 border-blue-500 pl-3 tracking-tighter" },
+    { id: "campus", label: "Campus Fresher (IN)", sub: "Indian student CGPA, course work & XII/X boards", target: "Indian Undergrads", style: "font-sans font-medium text-slate-800 text-[9.5px] border border-slate-200 p-2.5 rounded bg-slate-50" },
+    { id: "internship", label: "Internship/Fresher Intl.", sub: "Student roles, project-centric layout with no boards", target: "International Students", style: "font-sans text-slate-700 text-[10px] tracking-wide border-b border-dashed border-slate-300 pb-1" },
+    { id: "compact", label: "Executive Compact", sub: "Dense layout optimized for 5+ years of experience", target: "Senior Executives", style: "font-sans text-slate-900 text-[8.5px] leading-snug font-light tracking-tight border border-slate-350 p-2" },
+    { id: "academic", label: "Academic/Research", sub: "Expanded CV style for publications & research logs", target: "Researchers & Academics", style: "font-serif italic text-slate-800 text-[9.5px] leading-relaxed border-t border-b border-double border-slate-400 py-1.5" },
+    { id: "minimal", label: "Structured Minimal", sub: "Clean design-adjacent with fine accent highlights", target: "Designers & Product managers", style: "font-sans text-slate-600 text-[9px] pl-3 border-l border-slate-900 italic" },
+    { id: "fresher-psu", label: "Formal/PSU (IN)", sub: "Government jobs requiring passport photo box", target: "PSU & Government applicants", style: "font-sans text-slate-950 text-[9px] border-2 border-slate-900 p-3 font-bold uppercase tracking-wider text-center" },
+  ];
 
-    const fontStyle = isAcademic ? "font-serif text-[10px]" : isGrotesk ? "font-sans text-[10px]" : "font-sans text-[10px]";
+  return (
+    <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-hidden relative">
+      {/* Background gradients */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none"></div>
 
-    return (
-      <div className={`w-full bg-white text-slate-800 p-6 rounded-lg shadow-inner ${fontStyle} leading-normal text-left max-h-[60vh] overflow-y-auto`}>
-        {/* Header Section */}
-        {isPSU ? (
-          <div className="border border-slate-300 p-4 mb-4 flex justify-between items-start">
-            <div className="space-y-1">
-              <h1 className="text-base font-bold text-slate-900 font-serif uppercase tracking-wide">{mockData.name}</h1>
-              <p className="text-[9px] font-mono text-slate-600">{mockData.email} | {mockData.phone}</p>
-              <p className="text-[9px] font-mono text-slate-600">Location: {mockData.location} | DOB: 12-10-1999</p>
-            </div>
-            <div className="w-16 h-20 border border-dashed border-slate-400 bg-slate-100 flex items-center justify-center text-[7px] text-slate-400 text-center font-mono">
-              Passport Photo
-            </div>
-          </div>
-        ) : (
-          <div className={`pb-4 border-b border-slate-200 mb-4 text-center ${isGrotesk ? 'text-left' : ''} ${isMinimal ? 'border-l-4 border-l-slate-800 pl-3 border-b-0 pb-0' : ''}`}>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">{mockData.name}</h1>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">{mockData.title}</p>
-            <div className="flex flex-wrap justify-center gap-x-3 text-[9px] text-slate-400 mt-1 font-mono">
-              <span>{mockData.location}</span>
-              <span>•</span>
-              <span>{mockData.phone}</span>
-              <span>•</span>
-              <span>{mockData.email}</span>
-            </div>
-            <div className="flex justify-center gap-x-3 text-[9px] text-slate-400 mt-0.5 font-mono">
-              <span>{mockData.linkedin}</span>
-              <span>•</span>
-              <span>{mockData.github}</span>
-            </div>
-          </div>
-        )}
+      {/* Navbar header */}
+      <header className="max-w-6xl mx-auto w-full px-6 py-6 flex justify-between items-center relative z-20 border-b border-slate-900">
+        <div className="flex items-center gap-2">
+          <span className="font-display text-2xl font-bold tracking-tight text-white bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Fresume</span>
+          <span className="text-[9px] font-mono uppercase bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-semibold tracking-wider">India-First</span>
+        </div>
+        <Link 
+          href="/app" 
+          className="px-4 py-2 border border-slate-800 hover:bg-slate-900 text-slate-200 rounded-lg font-mono text-xs transition-all flex items-center gap-1.5"
+        >
+          <span>Go to App</span>
+          <ArrowRight size={12} />
+        </Link>
+      </header>
 
-        {/* Summary */}
-        {!isCompact && !isPSU && (
-          <div className="mb-4 space-y-1">
-            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Professional Summary</h2>
-            <p className="text-[10px] text-slate-600 leading-relaxed">{mockData.summary}</p>
-          </div>
-        )}
+      {/* Hero Section */}
+      <section className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center space-y-8 relative z-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-xs font-mono font-medium animate-pulse">
+          <Sparkles size={12} />
+          <span>Real-time Anti-Hallucination Sandbox</span>
+        </div>
+        
+        <h1 className="font-display text-4xl md:text-6xl font-bold tracking-tight text-white max-w-3xl mx-auto leading-tight">
+          Every resume tool promises AI magic. Ours refuses to make things up.
+        </h1>
+        
+        <p className="text-sm md:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Fresume rewrites what you actually did — it never invents a metric you didn&apos;t give it. Try it below, right now, on a real line from your resume.
+        </p>
 
-        {/* Experience Section */}
-        <div className="mb-4 space-y-2">
-          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Experience</h2>
-          {mockData.experience.map((exp, index) => (
-            <div key={index} className="space-y-1">
-              <div className="flex justify-between items-start">
-                <div>
-                  <span className="font-bold text-slate-900">{exp.title}</span>
-                  <span className="text-slate-500"> — {exp.company}</span>
+        {/* Live Interactive Demo Box */}
+        <div className="max-w-2xl mx-auto bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 text-left">
+          <form onSubmit={handleRewrite} className="space-y-4">
+            <div className="relative">
+              <textarea
+                value={bulletText}
+                onChange={(e) => setBulletText(e.target.value.slice(0, 280))}
+                placeholder="Enter a line from your resume..."
+                className="w-full h-24 p-4 bg-slate-950/80 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500 transition-all resize-none leading-relaxed"
+                maxLength={280}
+              />
+              <div className="absolute bottom-3 right-3 text-[10px] font-mono text-slate-500">
+                {bulletText.length} / 280
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || !bulletText.trim()}
+              className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-xs font-semibold shadow-lg shadow-blue-500/15 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="animate-spin" size={12} />
+                  <span>Invoking Gemini Auditing Engine...</span>
+                </>
+              ) : (
+                <>
+                  <span>Rewrite this</span>
+                  <ArrowRight size={12} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* SKELETON LOADING STATE */}
+          {loading && (
+            <div className="border border-slate-800 rounded-xl p-4 bg-slate-950/40 space-y-2.5 animate-pulse">
+              <div className="h-3 bg-slate-800 rounded w-1/3"></div>
+              <div className="h-4 bg-slate-800 rounded w-full"></div>
+              <div className="h-3 bg-slate-800 rounded w-2/3"></div>
+            </div>
+          )}
+
+          {/* ERROR HANDLING (Rate limits etc.) */}
+          {errorMsg && (
+            <div className="border border-red-500/20 bg-red-500/5 rounded-xl p-4 space-y-3 font-mono text-xs leading-relaxed">
+              <p className="text-red-400">{errorMsg}</p>
+              {errorMsg.includes("limit") && (
+                <Link
+                  href="/app"
+                  className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 font-bold underline"
+                >
+                  <span>Sign up free to keep going</span>
+                  <ArrowRight size={12} />
+                </Link>
+              )}
+            </div>
+          )}
+
+          {/* RESPONSE RENDERER INLINE */}
+          {result && (
+            <div className="relative pt-4 flex flex-col space-y-2">
+              {/* Trace-mark connecting line */}
+              <div className={`absolute top-0 left-6 bottom-0 w-[1px] ${result.grounded ? 'bg-amber-500/40' : 'bg-red-500/40'} z-0`}></div>
+
+              <div className="flex gap-4 items-start relative z-10">
+                {/* Dot */}
+                <div className={`w-3 h-3 rounded-full mt-2 shrink-0 border-2 ${result.grounded ? 'bg-amber-500 border-slate-950' : 'bg-red-500 border-slate-950'}`}></div>
+                
+                <div className="flex-1 space-y-2.5">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {result.grounded ? (
+                      <span className="text-[9px] font-mono text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded uppercase tracking-wider font-semibold">
+                        Grounded in what you wrote
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-mono text-red-400 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded uppercase tracking-wider font-semibold">
+                        No metric provided — none invented
+                      </span>
+                    )}
+                  </div>
+                  
+                  <div className="bg-slate-950/80 border border-slate-850 p-4 rounded-xl space-y-2">
+                    <p className="text-xs text-slate-200 font-mono leading-relaxed">&ldquo;{result.rewritten}&rdquo;</p>
+                    {result.note && (
+                      <p className="text-[10px] text-slate-400 leading-normal font-sans italic border-t border-slate-900 pt-2">
+                        💡 {result.note}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <span className="text-[9px] text-slate-400 font-mono">{exp.date}</span>
               </div>
-              <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-600 leading-relaxed">
-                {exp.bullets.map((bullet, idx) => (
-                  <li key={idx}>{bullet}</li>
-                ))}
-              </ul>
             </div>
-          ))}
+          )}
+
+          <p className="text-[10px] text-slate-500 font-mono text-center pt-2">
+            This is what Fix does inside Fresume — normally part of the ₹20 session pass. You just got a free preview.
+          </p>
+        </div>
+      </section>
+
+      {/* Segment Toggle directly under Hero */}
+      <section className="max-w-md mx-auto px-6 py-6 text-center space-y-4 relative z-10">
+        <div className="inline-flex p-1 bg-slate-900 border border-slate-800 rounded-xl">
+          <button
+            onClick={() => setSegment("professional")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              segment === "professional" ? "bg-blue-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            I&apos;m a professional
+          </button>
+          <button
+            onClick={() => setSegment("student")}
+            className={`px-4 py-1.5 rounded-lg text-xs font-mono font-medium transition-all ${
+              segment === "student" ? "bg-blue-600 text-white shadow" : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            I&apos;m a student
+          </button>
+        </div>
+        <p className="text-xs font-mono text-slate-400">
+          {segment === "student" 
+            ? "Turn coursework and projects into resume-ready achievements." 
+            : "Tailor your resume to a specific job description in minutes."}
+        </p>
+      </section>
+
+      {/* How it Works - Interactive Pipeline Strip */}
+      <section 
+        className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full"
+        onMouseEnter={() => setActivePipelineStage(99)} // activates all when entering section
+        onMouseLeave={() => setActivePipelineStage(null)}
+      >
+        <div className="text-center space-y-3 mb-16">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">The Truth-Grounded Pipeline</h2>
+          <p className="text-xs text-slate-400 max-w-lg mx-auto font-mono">
+            Hover over a stage to see the score change and audits run.
+          </p>
         </div>
 
-        {/* Projects Section */}
-        <div className="mb-4 space-y-2">
-          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Projects</h2>
-          {mockData.projects.map((proj, index) => (
-            <div key={index} className="space-y-1">
-              <div className="flex justify-between items-start">
-                <span className="font-bold text-slate-900">{proj.title} | <span className="font-normal text-slate-500">{proj.role}</span></span>
-                <span className="text-[9px] text-slate-400 font-mono">Tech: {proj.tech}</span>
-              </div>
-              <ul className="list-disc pl-4 space-y-0.5 text-[9px] text-slate-600 leading-relaxed">
-                {proj.bullets.map((bullet, idx) => (
-                  <li key={idx}>{bullet}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Connecting line (Desktop) */}
+          <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-slate-800/20 -translate-y-1/2 pointer-events-none z-0"></div>
 
-        {/* Skills Section */}
-        <div className="mb-4 space-y-1">
-          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Skills</h2>
-          <div className="grid grid-cols-1 gap-1 text-[9px] text-slate-600">
-            <div><strong className="text-slate-900">Languages:</strong> {mockData.skills.languages.join(", ")}</div>
-            <div><strong className="text-slate-900">Tools & Platforms:</strong> {mockData.skills.tools.join(", ")}</div>
-            {!isCompact && <div><strong className="text-slate-900">Soft Skills:</strong> {mockData.skills.soft.join(", ")}</div>}
+          {/* Stage 1: Analyze */}
+          <div 
+            onMouseEnter={() => setActivePipelineStage(1)}
+            className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-blue-500/40 transition-all group cursor-pointer"
+          >
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
+                <FileText size={20} />
+              </div>
+              <ScoreCounter target={54} active={activePipelineStage === 1 || activePipelineStage === 99} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white group-hover:text-blue-400 transition-all">1. Analyze</h3>
+                <span className="text-[8px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded font-semibold">FREE</span>
+              </div>
+              <p className="text-[10px] font-mono text-slate-500 mt-0.5 uppercase tracking-wider">ATS Score Scan</p>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              3 findings flagged, including 2 bullets with no measurable outcome.
+            </p>
+          </div>
+
+          {/* Stage 2: Fix */}
+          <div 
+            onMouseEnter={() => setActivePipelineStage(2)}
+            className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-indigo-500/40 transition-all group cursor-pointer"
+          >
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                <Layers size={20} />
+              </div>
+              <ScoreCounter target={71} active={activePipelineStage === 2 || activePipelineStage === 99} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-all">2. Fix</h3>
+                <span className="text-[8px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded font-semibold">₹20 PASS</span>
+              </div>
+              <p className="text-[10px] font-mono text-slate-500 mt-0.5 uppercase tracking-wider">AI Grounded Auditing</p>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              AI rewrote 2 bullets — grounded, no invented numbers.
+            </p>
+          </div>
+
+          {/* Stage 3: Generate */}
+          <div 
+            onMouseEnter={() => setActivePipelineStage(3)}
+            className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-amber-500/40 transition-all group cursor-pointer"
+          >
+            <div className="flex justify-between items-start">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+                <Printer size={20} />
+              </div>
+              <ScoreCounter target={89} active={activePipelineStage === 3 || activePipelineStage === 99} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-white group-hover:text-amber-400 transition-all">3. Generate</h3>
+                <span className="text-[8px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded font-semibold">₹20 PASS</span>
+              </div>
+              <p className="text-[10px] font-mono text-slate-500 mt-0.5 uppercase tracking-wider">ATS-Guaranteed Compiler</p>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed font-sans">
+              Exported ATS-safe PDF, parseability confirmed.
+            </p>
           </div>
         </div>
+      </section>
 
-        {/* Education Section */}
-        <div className="space-y-2">
-          <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wide border-b border-slate-100 pb-0.5">Education</h2>
-          {mockData.education.map((edu, index) => (
-            <div key={index} className="space-y-0.5">
-              <div className="flex justify-between">
-                <span className="font-bold text-slate-900">{edu.degree}</span>
-                <span className="text-[9px] text-slate-400 font-mono">{edu.date}</span>
-              </div>
-              <div className="text-slate-600 flex justify-between text-[9px]">
-                <span>{edu.institution}</span>
-                <span className="font-semibold text-slate-700">Grade: {edu.grade}</span>
-              </div>
-              {(isCampus || isPSU) && (
-                <div className="text-[8px] font-mono text-slate-500 bg-slate-50 border border-slate-150 p-1.5 rounded mt-0.5">
-                  {edu.boards}
+      {/* Template Showcase - Interactive layout swap on hover */}
+      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full">
+        <div className="text-center space-y-3 mb-16">
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">8 ATS-Guaranteed Layouts</h2>
+          <p className="text-xs text-slate-400 max-w-lg mx-auto font-mono">
+            Hover over a card to preview how your bullet renders in that template&apos;s actual typography.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {templates.map((tmpl) => (
+            <div
+              key={tmpl.id}
+              onMouseEnter={() => setHoveredTemplate(tmpl.id)}
+              onMouseLeave={() => setHoveredTemplate(null)}
+              className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-5 rounded-xl transition-all hover:border-slate-700 min-h-48 flex flex-col justify-between group cursor-pointer"
+            >
+              {hoveredTemplate === tmpl.id ? (
+                /* LIVE TYPE PREVIEW IN MODAL STYLE */
+                <div className="flex-1 flex flex-col justify-center py-2 animate-fadeIn">
+                  <div className={tmpl.style}>
+                    &ldquo;{result ? result.rewritten : bulletText}&rdquo;
+                  </div>
+                  <p className="text-[8px] font-mono text-slate-500 text-center mt-3 tracking-wider uppercase">
+                    {tmpl.label} Rendering
+                  </p>
+                </div>
+              ) : (
+                /* STATIC PREVIEW LAYOUT */
+                <div className="flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <span className="text-[8px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
+                      {tmpl.target}
+                    </span>
+                    <h3 className="text-sm font-bold text-white font-body group-hover:text-blue-400 transition-all">
+                      {tmpl.label}
+                    </h3>
+                    <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                      {tmpl.sub}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-blue-400 flex items-center gap-1">
+                    <span>Hover to preview type</span>
+                    <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
               )}
             </div>
           ))}
         </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans overflow-hidden relative">
-      {/* Background radial glows */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-indigo-600/5 rounded-full blur-[140px] pointer-events-none"></div>
-
-      {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center space-y-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-xs font-mono font-medium animate-pulse">
-          <Sparkles size={12} />
-          <span>Next-Generation ATS Resume compiler</span>
-        </div>
-        <h1 className="font-display text-5xl md:text-7xl font-bold tracking-tight text-white max-w-4xl mx-auto leading-none">
-          Resumes without the <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">AI Hallucinations</span>.
-        </h1>
-        <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Fresume is a truth-grounded AI resume editor. We analyze your ATS compliance for free, audit verification lineage, and compile standard compliance designs.
-        </p>
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
-          <Link
-            href="/app"
-            className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-mono text-sm font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 transition-all flex items-center justify-center gap-2"
-          >
-            <span>Start Building for Free</span>
-            <ArrowRight size={14} />
-          </Link>
-          <a
-            href="#how-it-works"
-            className="w-full sm:w-auto px-8 py-3 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 rounded-xl font-mono text-sm transition-all flex items-center justify-center"
-          >
-            How it Works
-          </a>
-        </div>
       </section>
 
-      {/* How it Works Pipeline */}
-      <section id="how-it-works" className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full">
-        <div className="text-center space-y-3 mb-16">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">The Truth-Grounded Pipeline</h2>
-          <p className="text-sm text-slate-400 max-w-lg mx-auto font-mono">
-            How Fresume guards your lineage from end-to-end.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-          {/* Connecting Line (Desktop) */}
-          <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-blue-500/40 via-indigo-500/40 to-slate-800/40 -translate-y-1/2 pointer-events-none z-0"></div>
-
-          {/* Stage 1: Analyze */}
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-blue-500/30 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center">
-              <FileText size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">1. Analyze</h3>
-                <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">FREE</span>
-              </div>
-              <p className="text-xs font-mono text-slate-500 mt-0.5 uppercase tracking-wider">ATS Compliance Scan</p>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed font-body">
-              Upload your resume or paste raw text. Fresume executes instant parseability audits, checks formatting gaps, and flags missing metrics for free.
-            </p>
-          </div>
-
-          {/* Stage 2: Fix */}
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-blue-500/30 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center">
-              <Layers size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">2. Fix</h3>
-                <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded">PAID PASS</span>
-              </div>
-              <p className="text-xs font-mono text-slate-500 mt-0.5 uppercase tracking-wider">AI Grounded Auditing</p>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed font-body">
-              Edit bullets interactively with AI assistance. Fresume locks down verb strength and enforces factual representation using the non-repudiable ledger audit.
-            </p>
-          </div>
-
-          {/* Stage 3: Generate */}
-          <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl relative z-10 space-y-4 hover:border-blue-500/30 transition-all">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
-              <Printer size={20} />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-bold text-white">3. Generate</h3>
-                <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded">PAID PASS</span>
-              </div>
-              <p className="text-xs font-mono text-slate-500 mt-0.5 uppercase tracking-wider">ATS-Guaranteed Compiler</p>
-            </div>
-            <p className="text-xs text-slate-400 leading-relaxed font-body">
-              Compile your clean resume without Fresume branding. Download PDF, DOCX, or Plaintext instantly to send out to recruiters.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust & Differentiator Section */}
+      {/* Trust Section - Ledger excerpt */}
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 text-left">
             <div className="w-12 h-12 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center">
               <ShieldCheck size={24} />
             </div>
+            
             <h2 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
               Anti-Hallucination: AI Grounding Guard
             </h2>
-            <p className="text-sm text-slate-300 leading-relaxed font-body">
-              Unlike generic AI writers that fabricate fake numbers to inflate scores (e.g. claiming you "saved $10M" out of nowhere), Fresume maintains a strict **evidence constraint**. 
+
+            <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+              Nothing gets added that you didn&apos;t put there first.
             </p>
-            <p className="text-sm text-slate-400 leading-relaxed font-body">
-              Our AI rewrite assistant will help you structure sentences using strong action verbs and professional style guidelines, but it **strictly rejects inventing metrics**. If a metric is missing, Fresume guides you to provide real data points, keeping your resume 105% audit-safe and truthful.
+
+            <p className="text-sm text-slate-400 leading-relaxed font-sans">
+              Unlike generic AI writers that fabricate fake numbers to inflate scores (e.g. claiming you &ldquo;saved $10M&rdquo; out of nowhere), Fresume maintains a strict **evidence constraint**. 
+            </p>
+            
+            <p className="text-sm text-slate-400 leading-relaxed font-sans">
+              Our AI rewrite assistant will help you structure sentences using strong action verbs and professional style guidelines, but it **strictly rejects inventing metrics**. If a metric is missing, Fresume guides you to provide real data points, keeping your resume 100% audit-safe and truthful.
             </p>
           </div>
-          <div className="bg-slate-900/60 backdrop-blur-xl border border-slate-800 p-8 rounded-2xl space-y-6">
-            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-500">Grounded Audit Ledger</h3>
-            <div className="space-y-4">
-              <div className="p-4 bg-slate-950 border border-slate-850 rounded-xl space-y-1">
-                <span className="text-[10px] font-mono text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.5 rounded">REJECTED BY AI GUARD</span>
-                <p className="text-xs text-slate-400 font-mono mt-1">"Optimized pipeline code which decreased latency by 45% and saved $500,000 yearly."</p>
-                <p className="text-[10px] text-slate-500 font-mono mt-1">* Reason: Latency metrics and financial figures not found in raw human experience files.</p>
+
+          {/* Terminal styled Chain-of-Custody log */}
+          <div className="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-2xl relative">
+            <div className="flex justify-between items-center border-b border-slate-900 pb-3">
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/60"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60"></div>
               </div>
-              <div className="p-4 bg-slate-950 border border-slate-850 rounded-xl space-y-1">
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">GROUNDED COMPLIANCE</span>
-                <p className="text-xs text-slate-300 font-mono mt-1">"Refactored backend pipeline code, introducing [ADD LATENCY METRIC] to optimize data throughput."</p>
-                <p className="text-[10px] text-slate-500 font-mono mt-1">* Reason: Facts validated. Placeholders added safely.</p>
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Groundwork Audit Trail</span>
+            </div>
+
+            <div className="font-mono text-[10px] text-slate-400 leading-relaxed space-y-2">
+              <div className="flex items-start gap-2">
+                <span className="text-slate-600 font-bold">line_042</span>
+                <span className="text-blue-400">&rarr;</span>
+                <span>user-provided: <span className="text-slate-300">&ldquo;Optimized database speeds.&rdquo;</span></span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-slate-600 font-bold">line_042</span>
+                <span className="text-blue-400">&rarr;</span>
+                <span>ai-rewrite-of:line_042 <span className="text-red-400 font-semibold bg-red-500/10 px-1 border border-red-500/20 rounded">(rejected: unverified metric &ldquo;40%&rdquo;)</span></span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-slate-600 font-bold">line_042</span>
+                <span className="text-blue-400">&rarr;</span>
+                <span>ai-rewrite-of:line_042 <span className="text-emerald-400 font-semibold bg-emerald-500/10 px-1 border border-emerald-500/20 rounded">(approved: verb strengthened, no new numbers)</span></span>
+              </div>
+              <div className="flex items-start gap-2 border-t border-slate-900 pt-2 mt-2">
+                <span className="text-slate-600 font-bold">line_042</span>
+                <span className="text-blue-400">&rarr;</span>
+                <span>user-edited-manual: <span className="text-emerald-400">&ldquo;Refactored index strategies, reducing query lookup times by 3 releases.&rdquo;</span></span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Template Showcase */}
-      <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full">
-        <div className="text-center space-y-3 mb-16">
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-white">8 ATS-Guaranteed Templates</h2>
-          <p className="text-sm text-slate-400 max-w-lg mx-auto font-mono">
-            Designed for specific regions and career segments. Click a card to preview.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {templates.map((tmpl) => (
-            <div 
-              key={tmpl.id} 
-              onClick={() => setPreviewTemplate(tmpl.id)}
-              className="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-5 rounded-xl space-y-3 hover:border-slate-700 transition-all flex flex-col justify-between cursor-pointer group"
-            >
-              <div className="space-y-2">
-                <span className="text-[9px] font-mono text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider group-hover:border-blue-500/40 transition-all">
-                  Template
-                </span>
-                <h3 className="text-sm font-bold text-white font-body group-hover:text-blue-400 transition-all">{tmpl.label}</h3>
-                <p className="text-[11px] text-slate-400 leading-relaxed font-sans">{tmpl.sub}</p>
-              </div>
-              <span className="text-[11px] font-mono text-blue-400 group-hover:text-blue-300 flex items-center gap-1.5 pt-2">
-                <span>View Style Preview</span>
-                <ArrowRight size={10} />
-              </span>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -374,12 +471,12 @@ export default function MarketingPage() {
       <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-900 relative z-10 w-full text-center">
         <div className="text-center space-y-3 mb-16">
           <h2 className="font-display text-3xl md:text-4xl font-bold text-white">Transparent Pay-Per-Use Pricing</h2>
-          <p className="text-sm text-slate-400 max-w-lg mx-auto font-mono">
-            No recurring credit card charges. Pay only when you are satisfied.
+          <p className="text-xs text-slate-400 max-w-lg mx-auto font-mono">
+            Free to analyze. ₹20 unlocks AI rewrites and export — one single session pass, no subscription.
           </p>
         </div>
 
-        <div className="max-w-md mx-auto bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6 text-center">
+        <div className="max-w-lg mx-auto bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6 text-center">
           <div className="space-y-1">
             <span className="text-[9px] font-mono text-blue-400 uppercase tracking-widest font-semibold bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded">
               Single Session Pass
@@ -391,29 +488,29 @@ export default function MarketingPage() {
           </div>
 
           <p className="text-xs text-slate-400 leading-relaxed font-body">
-            Upload or paste details, analyze your compliance metrics, and check your ATS compatibility completely for free. Only purchase a pass to access interactive rewrite fixes and export documents.
+            Run a full ATS scan and see every finding for free. When you&apos;re ready to fix and export, ₹20 unlocks AI-grounded rewrites, the guided wizard, and all 8 templates for that session — no recurring charge.
+          </p>
+
+          <p className="text-xs text-amber-500 font-mono italic">
+            Most resume tools lock you into a monthly plan or a trial that quietly renews at a much higher price. Fresume doesn&apos;t.
           </p>
 
           <div className="border-t border-slate-800 pt-4 text-left space-y-3 text-xs font-mono">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">1. Compliance Score Scan</span>
+              <span className="text-slate-400">ATS Rubric Compliance Score</span>
               <span className="text-emerald-400 font-bold">100% Free</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-400">2. Missing Details Finder</span>
-              <span className="text-emerald-400 font-bold">100% Free</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400">3. AI Grounding Audit Check</span>
+              <span className="text-slate-400">Verbs & Quantitative Density Gaps List</span>
               <span className="text-emerald-400 font-bold">100% Free</span>
             </div>
             <div className="flex items-center justify-between border-t border-slate-850 pt-2">
-              <span className="text-slate-300">4. Interactive Line Fixes</span>
-              <span className="text-blue-400">Paid Session</span>
+              <span className="text-slate-300">Interactive Line-Editor Rewriter</span>
+              <span className="text-blue-400">Requires ₹20 Pass</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-300">5. PDF/DOCX/TXT Downloads</span>
-              <span className="text-blue-400">Paid Session</span>
+              <span className="text-slate-300">PDF, Word (DOCX) & Plaintext Compilers</span>
+              <span className="text-blue-400">Requires ₹20 Pass</span>
             </div>
           </div>
 
@@ -421,57 +518,11 @@ export default function MarketingPage() {
             href="/app"
             className="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-sm font-bold shadow-lg shadow-blue-500/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <span>Activate Session now</span>
+            <span>Analyze your resume free</span>
             <ArrowRight size={14} />
           </Link>
         </div>
       </section>
-
-      {/* TEMPLATE PREVIEW MODAL */}
-      {previewTemplate && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-6 z-50 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-6 shadow-2xl flex flex-col space-y-4 relative">
-            <button 
-              onClick={() => setPreviewTemplate(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-200 transition-all"
-            >
-              <X size={20} />
-            </button>
-            <div className="space-y-1">
-              <span className="text-[10px] font-mono text-blue-400 uppercase tracking-widest font-semibold bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded">
-                Live Design Showcase
-              </span>
-              <h3 className="font-display text-xl font-bold text-white">
-                {templates.find(t => t.id === previewTemplate)?.label} Layout Preview
-              </h3>
-            </div>
-            
-            {/* Render selected stylesheet miniature resume inside the modal */}
-            {renderTemplatePreview(previewTemplate)}
-
-            <div className="flex justify-between items-center pt-2">
-              <p className="text-[10px] text-slate-500 font-mono">
-                * Note: Displays clean ATS-optimized rendering with no watermark tags.
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPreviewTemplate(null)}
-                  className="px-4 py-2 text-xs text-slate-400 hover:text-slate-200 font-mono transition-all"
-                >
-                  Close
-                </button>
-                <Link
-                  href="/app"
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-mono text-xs font-bold shadow-lg shadow-blue-500/10 transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <span>Use this Template</span>
-                  <ArrowRight size={12} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
       <footer className="border-t border-slate-900 py-8 text-center text-xs text-slate-600 font-mono relative z-10">
